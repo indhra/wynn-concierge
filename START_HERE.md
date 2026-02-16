@@ -57,7 +57,7 @@ wynn-concierge/
 ## 🎯 What You Need to Do Next
 
 ### **Priority 1: Test Locally (30 min)**
-Follow [CHECKLIST.md](CHECKLIST.md) Phase 1:
+Follow [CHECKLIST.md](docs/CHECKLIST.md) Phase 1:
 
 1. Add your OpenAI API key to `.env`
 2. Run: `streamlit run src/app.py`
@@ -65,7 +65,7 @@ Follow [CHECKLIST.md](CHECKLIST.md) Phase 1:
 4. Verify everything works
 
 ### **Priority 2: Deploy to Cloud (45 min)**
-Follow [DEPLOYMENT.md](DEPLOYMENT.md):
+Follow [DEPLOYMENT.md](docs/DEPLOYMENT.md):
 
 1. Push to GitHub
 2. Deploy to Streamlit Cloud (FREE)
@@ -73,7 +73,7 @@ Follow [DEPLOYMENT.md](DEPLOYMENT.md):
 4. Update README with live link
 
 ### **Priority 3: Add Screenshots (1 hour)**
-Follow [SCREENSHOTS.md](SCREENSHOTS.md):
+Follow [SCREENSHOTS.md](docs/SCREENSHOTS.md):
 
 1. Capture the key screenshots
 2. **CRITICAL**: Screenshot 5 (vegetarian redirect)
@@ -113,7 +113,7 @@ When hiring managers visit your project, here's their journey:
 
 ## 🎨 Key Documents Explained
 
-### **1. [HIRING_MANAGER.md](HIRING_MANAGER.md)** ⭐
+### **1. [HIRING_MANAGER.md](docs/HIRING_MANAGER.md)** ⭐
 **Purpose:** Hiring manager's evaluation guide  
 **Contains:**
 - 3 test scenarios (5 minutes total)
@@ -126,7 +126,7 @@ When hiring managers visit your project, here's their journey:
 
 ---
 
-### **2. [CHECKLIST.md](CHECKLIST.md)** ⭐ 
+### **2. [CHECKLIST.md](docs/CHECKLIST.md)** ⭐ 
 **Purpose:** YOUR step-by-step TODO list  
 **Contains:**
 - Phase 1: Essential setup (required)
@@ -139,7 +139,7 @@ When hiring managers visit your project, here's their journey:
 
 ---
 
-### **3. [DEPLOYMENT.md](DEPLOYMENT.md)** 🚀
+### **3. [DEPLOYMENT.md](docs/DEPLOYMENT.md)** 🚀
 **Purpose:** Deploy to Streamlit Cloud (free hosting)  
 **Contains:**
 - Step-by-step deployment guide
@@ -151,7 +151,7 @@ When hiring managers visit your project, here's their journey:
 
 ---
 
-### **4. [SCREENSHOTS.md](SCREENSHOTS.md)** 📸
+### **4. [SCREENSHOTS.md](docs/SCREENSHOTS.md)** 📸
 **Purpose:** Create visual proof for portfolio  
 **Contains:**
 - 8 screenshot scenarios to capture
@@ -163,7 +163,7 @@ When hiring managers visit your project, here's their journey:
 
 ---
 
-### **5. [ARCHITECTURE.md](ARCHITECTURE.md)** 🏗️
+### **5. [ARCHITECTURE.md](docs/ARCHITECTURE.md)** 🏗️
 **Purpose:** Technical deep-dive for senior engineers  
 **Contains:**
 - System architecture diagram
@@ -176,7 +176,7 @@ When hiring managers visit your project, here's their journey:
 
 ---
 
-### **6. [QUICKSTART.md](QUICKSTART.md)** ⚡
+### **6. [QUICKSTART.md](docs/QUICKSTART.md)** ⚡
 **Purpose:** Quick start guide with troubleshooting  
 **Contains:**
 - Installation instructions
@@ -337,11 +337,11 @@ Before sending to hiring managers:
 
 ## 🚀 Next Steps
 
-1. **Read [CHECKLIST.md](CHECKLIST.md)** - Your detailed TODO list
+1. **Read [CHECKLIST.md](docs/CHECKLIST.md)** - Your detailed TODO list
 2. **Follow Phase 1** - Get it working locally
 3. **Follow Phase 2** - Deploy to cloud
 4. **Follow Phase 3** - Add screenshots
-5. **Review [HIRING_MANAGER.md](HIRING_MANAGER.md)** - Know what they'll see
+5. **Review [HIRING_MANAGER.md](docs/HIRING_MANAGER.md)** - Know what they'll see
 6. **Practice the demo** - 2-minute walkthrough
 7. **Send to hiring managers!** - Use the email template
 
@@ -350,11 +350,11 @@ Before sending to hiring managers:
 ## 📧 Questions?
 
 All documentation is in place:
-- [CHECKLIST.md](CHECKLIST.md) - What to do
-- [HIRING_MANAGER.md](HIRING_MANAGER.md) - What they'll see
-- [DEPLOYMENT.md](DEPLOYMENT.md) - How to deploy
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Technical details
-- [SCREENSHOTS.md](SCREENSHOTS.md) - Visual assets
+- [CHECKLIST.md](docs/CHECKLIST.md) - What to do
+- [HIRING_MANAGER.md](docs/HIRING_MANAGER.md) - What they'll see
+- [DEPLOYMENT.md](docs/DEPLOYMENT.md) - How to deploy
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Technical details
+- [SCREENSHOTS.md](docs/SCREENSHOTS.md) - Visual assets
 
 ---
 
