@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wynn Concierge AI | Project Showcase</title>
+    
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reset.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/theme/black.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E4BC;
+            --wynn-red: #8B0000;
+            --dark-bg: #0a0a0a;
+            --card-bg: #1a1a1a;
+        }
+        
+        .reveal {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        }
+        
+        .reveal h1, .reveal h2, .reveal h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            text-transform: none;
+        }
+        
+        .reveal h1 {
+            font-size: 2.8em;
+            margin-bottom: 0.3em;
+        }
+        
+        .reveal h2 {
+            font-size: 1.6em;
+            margin-bottom: 0.4em;
+        }
+        
+        .reveal p, .reveal li {
+            color: #f5f5f5;
+            font-weight: 300;
+        }
+        
+        .reveal .subtitle {
+            font-size: 1.2em;
+            color: var(--gold-light);
+            font-style: italic;
+        }
+        
+        .gold-text { color: var(--gold) !important; }
+        .red-text { color: var(--wynn-red) !important; }
+        
+        /* Hero Slide */
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .author-info {
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .author-info h4 {
+            color: var(--gold);
+            margin: 0;
+            font-size: 1em;
+        }
+        
+        .author-info p {
+            font-size: 0.8em;
+            color: #c0c0c0;
+            margin: 5px 0 0;
+        }
+        
+        /* Tech Stack Grid */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .tech-item {
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 25px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-item:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+        
+        .tech-item i {
+            font-size: 2em;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+        
+        .tech-item h4 {
+            color: #fff;
+            font-size: 0.9em;
+            margin: 10px 0 5px;
+        }
+        
+        .tech-item p {
+            font-size: 0.7em;
+            color: #d0d0d0;
+            margin: 0;
+        }
+        
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, var(--card-bg) 0%, #252525 100%);
+            border-radius: 12px;
+            padding: 18px;
+            border-left: 4px solid var(--gold);
+            text-align: left;
+        }
+        
+        .feature-card h4 {
+            color: var(--gold);
+            font-size: 0.85em;
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feature-card p {
+            font-size: 0.68em;
+            margin: 0;
+            line-height: 1.4;
+            color: #ffffff;
+        }
+        
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin: 40px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            color: #c0c0c0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* UI Mockup Styles */
+        .mockup-container {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 900px;
+            margin: 20px auto;
+        }
+        
+        .mockup-header {
+            background: linear-gradient(90deg, var(--wynn-red) 0%, #5a0000 100%);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .mockup-header h3 {
+            color: var(--gold);
+            font-size: 1em;
+            margin: 0;
+        }
+        
+        .mockup-dots {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .mockup-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .mockup-dots .red { background: #ff5f56; }
+        .mockup-dots .yellow { background: #ffbd2e; }
+        .mockup-dots .green { background: #27ca3f; }
+        
+        .mockup-body {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 350px;
+        }
+        
+        .mockup-sidebar {
+            background: #252525;
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+        
+        .guest-card {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .guest-card .tier-badge {
+            background: linear-gradient(90deg, var(--gold) 0%, #B8860B 100%);
+            color: #000;
+            font-size: 0.6em;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        .guest-card h4 {
+            color: #fff;
+            font-size: 0.9em;
+            margin: 10px 0 5px;
+        }
+        
+        .guest-card p {
+            font-size: 0.7em;
+            color: #e0e0e0;
+            margin: 0;
+        }
+        
+        .mockup-main {
+            padding: 20px;
+            text-align: left;
+        }
+        
+        .chat-bubble {
+            background: #2d2d2d;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            max-width: 85%;
+        }
+        
+        .chat-bubble.user {
+            background: linear-gradient(135deg, var(--wynn-red) 0%, #5a0000 100%);
+            margin-left: auto;
+        }
+        
+        .chat-bubble.ai {
+            border-left: 3px solid var(--gold);
+        }
+        
+        .chat-bubble p {
+            font-size: 0.75em;
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        /* Timeline */
+        .timeline {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .timeline-item {
+            text-align: center;
+            position: relative;
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: -20px;
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold) 0%, transparent 100%);
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        
+        .timeline-dot {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .timeline-item.completed .timeline-dot {
+            background: #27ca3f;
+        }
+        
+        .timeline-item h4 {
+            color: var(--gold);
+            font-size: 0.85em;
+            margin: 0 0 8px;
+        }
+        
+        .timeline-item p {
+            font-size: 0.7em;
+            color: #c0c0c0;
+            margin: 0;
+        }
+        
+        /* Problem/Solution Cards */
+        .problem-solution {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        
+        .ps-card {
+            padding: 30px;
+            border-radius: 15px;
+            text-align: left;
+        }
+        
+        .ps-card.problem {
+            background: linear-gradient(145deg, rgba(139, 0, 0, 0.3) 0%, rgba(90, 0, 0, 0.1) 100%);
+            border: 1px solid rgba(139, 0, 0, 0.5);
+        }
+        
+        .ps-card.solution {
+            background: linear-gradient(145deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.05) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .ps-card h3 {
+            font-size: 1.1em;
+            margin: 0 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ps-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .ps-card li {
+            font-size: 0.8em;
+            margin-bottom: 8px;
+            color: #f0f0f0;
+        }
+        
+        /* Quote styling */
+        .quote {
+            font-style: italic;
+            font-size: 1.3em;
+            color: var(--gold-light);
+            border-left: 4px solid var(--gold);
+            padding-left: 25px;
+            margin: 30px 0;
+        }
+        
+        /* Mermaid diagram styling */
+        .mermaid {
+            background: transparent !important;
+        }
+        
+        .mermaid svg {
+            max-width: 100% !important;
+        }
+        
+        /* Data section */
+        .data-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .data-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: left;
+        }
+        
+        .data-card h4 {
+            color: var(--gold);
+            margin: 0 0 15px;
+            font-size: 0.95em;
+        }
+        
+        .data-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .data-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+            font-size: 0.75em;
+            display: flex;
+            justify-content: space-between;
+            color: #f0f0f0;
+        }
+        
+        .data-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .data-list .count {
+            color: var(--gold);
+            font-weight: 600;
+        }
+        
+        /* CTA Button */
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+            color: #000;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+        
+        /* Slide Number */
+        .reveal .slide-number {
+            color: var(--gold);
+            font-size: 0.7em;
+        }
+        
+        /* Navigation arrows */
+        .reveal .controls button {
+            color: var(--gold);
+        }
+        
+        /* Progress bar */
+        .reveal .progress span {
+            background: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- SLIDE 1: Hero -->
+            <section>
+                <span class="hero-badge">AI/ML Portfolio Project</span>
+                <h1>🏝️ Wynn Concierge AI</h1>
+                <p class="subtitle">Hyper-Personalized Luxury Guest Itinerary System</p>
+                <p style="font-size: 0.9em; margin-top: 20px;">
+                    A production-ready AI agent powered by <span class="gold-text">GPT-4</span> and <span class="gold-text">LangChain RAG</span>
+                </p>
+                
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-number">25</div>
+                        <div class="stat-label">Luxury Venues</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">RAG</div>
+                        <div class="stat-label">Vector Search</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">Guest Profiles</div>
+                    </div>
+                </div>
+                
+                <div class="author-info">
+                    <h4>Indhra Kiranu N A</h4>
+                    <p><i class="fab fa-github"></i> github.com/indhra/wynn-concierge</p>
+                </div>
+            </section>
+            
+            <!-- SLIDE 2: The Problem -->
+            <section>
+                <h2>The Business Problem</h2>
+                <p class="quote">"Choice Paralysis is the Enemy of Luxury."</p>
+                
+                <div class="problem-solution">
+                    <div class="ps-card problem">
+                        <h3><i class="fas fa-exclamation-triangle red-text"></i> Challenges</h3>
+                        <ul>
+                            <li>22 dining venues + nightlife overwhelms guests</li>
+                            <li>High-net-worth guests face <strong>decision fatigue</strong></li>
+                            <li>Static PDFs & generic "Top 10" lists don't work</li>
+                            <li>No personalization for dietary restrictions</li>
+                            <li>VIPs expect <em>anticipation</em>, not reaction</li>
+                        </ul>
+                    </div>
+                    <div class="ps-card solution">
+                        <h3><i class="fas fa-lightbulb gold-text"></i> Solution</h3>
+                        <ul>
+                            <li>24/7 AI Digital Butler that <strong>plans</strong> logistics</li>
+                            <li>Time-sequenced itineraries in seconds</li>
+                            <li>Safety-first: filters allergies automatically</li>
+                            <li>VIP tier recognition with personalized tone</li>
+                            <li>Semantic search for vague requests</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SLIDE 3: Tech Stack -->
+            <section>
+                <h2>Tech Stack</h2>
+                <p style="font-size: 0.9em;">Enterprise-grade architecture aligned with Azure/Databricks ecosystem</p>
+                
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fas fa-brain"></i>
+                        <h4>GPT-4</h4>
+                        <p>Cognitive Engine</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-link"></i>
+                        <h4>LangChain</h4>
+                        <p>Agent Orchestration</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-database"></i>
+                        <h4>FAISS</h4>
+                        <p>Vector Store</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-search"></i>
+                        <h4>RAG</h4>
+                        <p>Retrieval Augmented</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fab fa-python"></i>
+                        <h4>Python 3.10+</h4>
+                        <p>Core Language</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-desktop"></i>
+                        <h4>Streamlit</h4>
+                        <p>Luxury UI</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-file-alt"></i>
+                        <h4>OpenAI Embeddings</h4>
+                        <p>text-embedding-3-small</p>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Guardrails</h4>
+                        <p>Safety Logic</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SLIDE 4: Architecture -->
+            <section>
+                <h2>System Architecture</h2>
+                <div class="mermaid">
+                    <pre>
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4AF37', 'primaryTextColor': '#fff', 'primaryBorderColor': '#D4AF37', 'lineColor': '#D4AF37', 'secondaryColor': '#1a1a1a', 'tertiaryColor': '#2a2a2a' }}}%%
+flowchart TB
+    subgraph UI["🖥️ Streamlit UI"]
+        A[Guest Selector] --> B[Chat Interface]
+    end
+    
+    subgraph AGENT["🤖 LangChain Agent"]
+        C[GPT-4 Concierge Persona]
+        D[System Prompt Engineering]
+    end
+    
+    subgraph RAG["📚 RAG Pipeline"]
+        E[FAISS Vector Store]
+        F[Semantic Search]
+        G[25 Venue Embeddings]
+    end
+    
+    subgraph DATA["📊 Data Layer"]
+        H[Guest Profiles CSV]
+        I[Resort Data JSON]
+    end
+    
+    subgraph SAFETY["🛡️ Safety Layer"]
+        J[Dietary Filter]
+        K[Allergy Check]
+        L[Time Conflict Guard]
+    end
+    
+    B --> C
+    C --> F
+    F --> E
+    E --> G
+    H --> J
+    I --> G
+    J --> C
+    K --> C
+    L --> C
+    C --> B
+                    </pre>
+                </div>
+            </section>
+            
+            <!-- SLIDE 5: RAG Flow -->
+            <section>
+                <h2>RAG Pipeline Flow</h2>
+                <div class="mermaid">
+                    <pre>
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#D4AF37', 'primaryTextColor': '#fff', 'primaryBorderColor': '#D4AF37', 'lineColor': '#D4AF37' }}}%%
+sequenceDiagram
+    participant U as 👤 Guest
+    participant A as 🤖 Agent
+    participant V as 📚 Vector Store
+    participant G as 🧠 GPT-4
+    participant S as 🛡️ Safety
+    
+    U->>A: "I want a quiet Italian dinner"
+    A->>V: Semantic search query
+    V->>V: Find similar venues
+    V->>A: Return: Tartufo Nero, Côte d'Azur...
+    A->>S: Filter by guest restrictions
+    S->>S: Check: Nut allergy → Filter
+    S->>A: Safe venues only
+    A->>G: Generate personalized response
+    G->>A: Curated itinerary
+    A->>U: "I've reserved Tartufo Nero at 8pm..."
+                    </pre>
+                </div>
+            </section>
+            
+            <!-- SLIDE 6: Key Features -->
+            <section>
+                <h2>Key Features</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4><i class="fas fa-shield-alt"></i> Safety-First Logic</h4>
+                        <p>Automatically filters venues by dietary restrictions and allergies before any suggestion is made</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-heart"></i> Vibe Matching</h4>
+                        <p>Semantic search understands "quiet jazz" vs "wild nightlife" from natural language</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-clock"></i> Smart Scheduling</h4>
+                        <p>No double-booking with realistic 15-min travel time between venues</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-crown"></i> VIP Recognition</h4>
+                        <p>Adjusts tone and perks based on Black/Platinum tier status</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-gem"></i> Luxury Persona</h4>
+                        <p>Sophisticated, anticipatory, discreet communication style</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><i class="fas fa-magic"></i> Graceful Fallbacks</h4>
+                        <p>Suggests alternatives when requests conflict with restrictions</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SLIDE 7: Data Overview -->
+            <section>
+                <h2>Synthetic Data Generated</h2>
+                
+                <div class="data-showcase">
+                    <div class="data-card">
+                        <h4><i class="fas fa-utensils"></i> 25 Luxury Venues</h4>
+                        <ul class="data-list">
+                            <li><span>Fine Dining</span><span class="count">8</span></li>
+                            <li><span>Casual Dining</span><span class="count">6</span></li>
+                            <li><span>Nightlife</span><span class="count">5</span></li>
+                            <li><span>Spa & Wellness</span><span class="count">3</span></li>
+                            <li><span>Shows & Entertainment</span><span class="count">3</span></li>
+                        </ul>
+                    </div>
+                    <div class="data-card">
+                        <h4><i class="fas fa-users"></i> 5 Guest Profiles</h4>
+                        <ul class="data-list">
+                            <li><span>Sarah Chen</span><span class="count">Black | Vegetarian</span></li>
+                            <li><span>Marcus Al-Rashid</span><span class="count">Black | Nut Allergy</span></li>
+                            <li><span>Emma Rodriguez</span><span class="count">Platinum | None</span></li>
+                            <li><span>James Harrison</span><span class="count">Platinum | Shellfish</span></li>
+                            <li><span>Priya Sharma</span><span class="count">Black | Vegan</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SLIDE 8: UI Mockup -->
+            <section>
+                <h2>Application Interface</h2>
+                
+                <div class="mockup-container">
+                    <div class="mockup-header">
+                        <div class="mockup-dots">
+                            <span class="red"></span>
+                            <span class="yellow"></span>
+                            <span class="green"></span>
+                        </div>
+                        <h3>🏝️ Wynn Al Marjan Concierge</h3>
+                    </div>
+                    <div class="mockup-body">
+                        <div class="mockup-sidebar">
+                            <p style="font-size: 0.7em; color: #b0b0b0; margin: 0 0 10px;">SELECT GUEST</p>
+                            <div class="guest-card">
+                                <span class="tier-badge">BLACK TIER</span>
+                                <h4>Sarah Chen</h4>
+                                <p>⚠️ Vegetarian</p>
+                                <p>💎 Prefers: Romantic, Quiet</p>
+                            </div>
+                            <div style="background: #333; border-radius: 8px; padding: 10px; margin-top: 15px;">
+                                <p style="font-size: 0.65em; color: #b0b0b0; margin: 0 0 8px;">QUICK SUGGESTIONS</p>
+                                <button style="background: var(--gold); color: #000; border: none; padding: 6px 12px; border-radius: 15px; font-size: 0.65em; margin: 2px;">🍷 Wine Evening</button>
+                                <button style="background: #444; color: #fff; border: none; padding: 6px 12px; border-radius: 15px; font-size: 0.65em; margin: 2px;">🎭 Show Night</button>
+                            </div>
+                        </div>
+                        <div class="mockup-main">
+                            <div class="chat-bubble user">
+                                <p>I want a steak dinner and a wild night out.</p>
+                            </div>
+                            <div class="chat-bubble ai">
+                                <p><strong style="color: var(--gold);">Ms. Chen,</strong> while The Obsidian Steakhouse is renowned, their vegetarian selection is limited.</p>
+                                <p style="margin-top: 10px;">I have instead taken the liberty of reserving a table at <strong>Verde Garden</strong> which offers an exceptional plant-based menu, followed by VIP entry to <strong>XS Skyline</strong>.</p>
+                                <p style="margin-top: 10px; color: var(--gold);">📍 7:30 PM → Verde Garden<br>📍 10:00 PM → XS Skyline (Cover waived)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p style="font-size: 0.75em; color: #c0c0c0;">The AI gracefully redirects while maintaining luxury tone ✨</p>
+            </section>
+            
+            <!-- SLIDE 9: Demo Scenario -->
+            <section>
+                <h2 style="margin-bottom: 0.3em;">Validation Test Scenario</h2>
+                
+                <div style="background: var(--card-bg); border-radius: 10px; padding: 15px; max-width: 680px; margin: 5px auto; text-align: left;">
+                    <h4 style="color: var(--gold); margin: 0 0 10px; font-size: 0.75em;"><i class="fas fa-flask"></i> Senior Engineer Level Test</h4>
+                    
+                    <div style="margin-bottom: 8px;">
+                        <p style="color: #b0b0b0; font-size: 0.65em; margin: 0 0 2px;">STEP 1: Select Guest</p>
+                        <p style="font-size: 0.78em; margin: 0;">Profile with <strong class="gold-text">"Vegetarian"</strong> restriction</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 8px;">
+                        <p style="color: #b0b0b0; font-size: 0.65em; margin: 0 0 2px;">STEP 2: Conflicting Request</p>
+                        <p style="font-size: 0.78em; background: rgba(139,0,0,0.3); padding: 6px; border-radius: 5px; margin: 0;">"I want a <strong>steak dinner</strong> and a wild night out."</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 0;">
+                        <p style="color: #b0b0b0; font-size: 0.65em; margin: 0 0 2px;">STEP 3: Expected Result</p>
+                        <p style="font-size: 0.7em; background: rgba(212,175,55,0.1); padding: 8px; border-radius: 5px; border-left: 3px solid var(--gold); margin: 0; line-height: 1.4;">
+                            ✅ AI detects conflict<br>
+                            ✅ Suggests alternative<br>
+                            ✅ Maintains luxury tone<br>
+                            ✅ Creates valid itinerary
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SLIDE 10: Roadmap -->
+            <section>
+                <h2>Strategic Roadmap</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-dot"><i class="fas fa-check"></i></div>
+                        <h4>Phase 1</h4>
+                        <p><strong>PoC Complete</strong></p>
+                        <p>Core logic validation, RAG pipeline, safety filtering</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot">2</div>
+                        <h4>Phase 2</h4>
+                        <p><strong>Integration</strong></p>
+                        <p>Connect to live PMS (Opera/Micros) for one-click booking</p>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot">3</div>
+                        <h4>Phase 3</h4>
+                        <p><strong>Voice Interface</strong></p>
+                        <p>OpenAI Whisper for in-room voice commands</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 50px;">
+                    <p style="font-size: 0.85em; color: #c0c0c0;">Target Deployment Stack</p>
+                    <p style="font-size: 0.75em;">
+                        <span style="background: #333; padding: 5px 12px; border-radius: 15px; margin: 0 5px;">Azure Kubernetes</span>
+                        <span style="background: #333; padding: 5px 12px; border-radius: 15px; margin: 0 5px;">Databricks Delta Lake</span>
+                        <span style="background: #333; padding: 5px 12px; border-radius: 15px; margin: 0 5px;">Opera PMS API</span>
+                    </p>
+                </div>
+            </section>
+            
+            <!-- SLIDE 11: Summary -->
+            <section>
+                <h2 style="margin-bottom: 0.3em;">Project Highlights</h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; max-width: 780px; margin-left: auto; margin-right: auto;">
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: left;">
+                        <h4 style="color: var(--gold); margin: 0 0 6px; font-size: 0.72em;"><i class="fas fa-code"></i> Technical Excellence</h4>
+                        <ul style="font-size: 0.62em; margin: 0; padding-left: 18px; line-height: 1.5;">
+                            <li>LangChain agent orchestration</li>
+                            <li>FAISS vector similarity search</li>
+                            <li>Custom system prompt  engineering</li>
+                            <li>Production-ready architecture</li>
+                        </ul>
+                    </div>
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: left;">
+                        <h4 style="color: var(--gold); margin: 0 0 6px; font-size: 0.72em;"><i class="fas fa-user-check"></i> User Experience</h4>
+                        <ul style="font-size: 0.62em; margin: 0; padding-left: 18px; line-height: 1.5;">
+                            <li>Luxury concierge persona</li>
+                            <li>VIP tier-aware responses</li>
+                            <li>Graceful conflict handling</li>
+                            <li>Intuitive Streamlit UI</li>
+                        </ul>
+                    </div>
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: left;">
+                        <h4 style="color: var(--gold); margin: 0 0 6px; font-size: 0.72em;"><i class="fas fa-shield-alt"></i> Safety & Guardrails</h4>
+                        <ul style="font-size: 0.62em; margin: 0; padding-left: 18px; line-height: 1.5;">
+                            <li>Dietary restriction filtering</li>
+                            <li>Allergy safety checks</li>
+                            <li>Time conflict prevention</li>
+                            <li>Hallucination guardrails</li>
+                        </ul>
+                    </div>
+                    <div style="background: var(--card-bg); padding: 12px; border-radius: 8px; text-align: left;">
+                        <h4 style="color: var(--gold); margin: 0 0 6px; font-size: 0.72em;"><i class="fas fa-chart-line"></i> Business Value</h4>
+                        <ul style="font-size: 0.62em; margin: 0; padding-left: 18px; line-height: 1.5;">
+                            <li>Reduces guest decision fatigue</li>
+                            <li>Revenue optimization engine</li>
+                            <li>Increases NPS scores</li>
+                            <li>Reinforces brand promise</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- SLIDE 12: Call to Action -->
+            <section>
+                <h1>Thank You</h1>
+                <p class="subtitle">Ready for any questions</p>
+                
+                <div style="margin-top: 40px;">
+                    <a href="https://github.com/indhra/wynn-concierge" target="_blank" class="cta-button">
+                        <i class="fab fa-github"></i> View on GitHub
+                    </a>
+                </div>
+                
+                <div class="author-info" style="margin-top: 50px;">
+                    <h4>Indhra Kiranu N A</h4>
+                    <p>AI/ML Engineer</p>
+                    <p style="margin-top: 15px;">
+                        <i class="fab fa-github"></i> github.com/indhra &nbsp;&nbsp;
+                        <i class="fab fa-linkedin"></i> linkedin.com/in/indhra
+                    </p>
+                </div>
+            </section>
+            
+        </div>
+    </div>
+
+    <!-- Reveal.js -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.0.5/dist/reveal.js"></script>
+    
+    <!-- Mermaid Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-mermaid-plugin@11.12.2/plugin/mermaid/mermaid.js"></script>
+    
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            progress: true,
+            controls: true,
+            center: true,
+            transition: 'slide',
+            backgroundTransition: 'fade',
+            
+            // Mermaid configuration
+            mermaid: {
+                theme: 'dark',
+                darkMode: true,
+                themeVariables: {
+                    darkMode: true,
+                    primaryColor: '#D4AF37',
+                    primaryTextColor: '#ffffff',
+                    primaryBorderColor: '#D4AF37',
+                    lineColor: '#D4AF37',
+                    secondaryColor: '#1a1a1a',
+                    tertiaryColor: '#2a2a2a'
+                }
+            },
+            
+            plugins: [RevealMermaid]
+        });
+    </script>
+</body>
+</html>
