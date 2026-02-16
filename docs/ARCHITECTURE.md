@@ -249,13 +249,13 @@ Guest: Sarah Chen (Vegetarian, Black Tier)
 ### Production Scale:
 - **Users:** 1,000+ concurrent → Azure Kubernetes Service
 - **Latency:** <2 seconds → Pre-compute embeddings, use Redis cache
-- **Cost:** ~$0.05 per session → Cheaper embedding model, cache LLM calls
+- **Cost:** ~$0.05 per session → Use efficient models (gpt-5-nano), cache LLM calls
 - **Data:** 500+ venues across multiple properties → Delta Lake integration
 
 ## Security & Privacy
 
 - ✅ API keys in environment variables (never committed)
-- ✅ Rate limiting (10 requests/hour per session in demo)
+- ✅ Rate limiting (5 requests/hour per user - built-in)
 - ✅ No PII stored (guest data is synthetic)
 - ✅ HTTPS only (Streamlit Cloud enforced)
 - ✅ Usage monitoring (OpenAI dashboard alerts)
@@ -263,8 +263,8 @@ Guest: Sarah Chen (Vegetarian, Black Tier)
 ## Technology Choices & Rationale
 
 | Choice | Alternative | Why This? |
-|--------|-------------|-----------|
-| **GPT-4** | GPT-3.5 Turbo | Better at persona consistency, nuanced reasoning |
+|--------|-------------|-----------|  
+| **OpenAI Models** | GPT-3.5, Claude | Latest models, configurable (gpt-5-nano default) |
 | **FAISS** | Pinecone, Weaviate | Faster for small datasets, no external dependency |
 | **Streamlit** | React, Flask | Rapid prototyping, data science friendly, free hosting |
 | **LangChain** | Custom orchestration | Standard framework, easier to extend |

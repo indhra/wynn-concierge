@@ -19,6 +19,76 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# ============================================================================
+# SENIOR ENGINEER FIX #1: Policy Validation & Compliance Guardrails
+# ============================================================================
+# These functions prevent the agent from making unsafe or non-compliant
+# recommendations. In production, these would integrate with the Property
+# Management System (PMS) and Responsible Gaming databases.
+# ============================================================================
+
+def validate_itinerary_policy(itinerary_text: str, guest_profile: Dict) -> Dict[str, any]:
+    """
+    Validates itinerary against business rules and compliance policies.
+    
+    COMPLIANCE CHECKS:
+    - Age restrictions (Nightclubs, Casino, Bars)
+    - Responsible Gaming protocols (self-exclusion lists)
+    - Time constraints (kitchen closing times, last entry)
+    - Capacity limits (event bookings)
+    
+    Args:
+        itinerary_text: The generated itinerary content
+        guest_profile: Guest profile with age, tier, preferences
+    
+    Returns:
+        Dict with 'valid' (bool) and 'message' (str) keys
+    """
+    itinerary_lower = itinerary_text.lower()
+    guest_age = guest_profile.get('age', 25)  # Default to 25 if not provided
+    
+    # Policy Check 1: Age-restricted venues (21+ requirement)
+    age_restricted_keywords = ['nightclub', 'casino', 'bar lounge', 'club']
+    for keyword in age_restricted_keywords:
+        if keyword in itinerary_lower and guest_age < 21:
+            return {
+                'valid': False,
+                'message': f"⚠️ POLICY VIOLATION: Guest is under 21. Cannot recommend {keyword.title()} venues. Please adjust request.",
+                'violation_type': 'AGE_RESTRICTION'
+            }
+    
+    # Policy Check 2: Responsible Gaming Protocol
+    # In production: Check against self-exclusion database via PMS integration
+    is_self_excluded = guest_profile.get('self_excluded_gaming', False)
+    if 'casino' in itinerary_lower and is_self_excluded:
+        return {
+            'valid': False,
+            'message': "⚠️ COMPLIANCE ALERT: Responsible Gaming Protocol activated. Casino recommendations blocked.",
+            'violation_type': 'RESPONSIBLE_GAMING'
+        }
+    
+    # Policy Check 3: Time constraint validation
+    # Prevents recommending venues outside operating hours
+    if '3:00 am' in itinerary_lower or '3am' in itinerary_lower:
+        return {
+            'valid': False,
+            'message': "⚠️ OPERATIONAL ALERT: Requested time exceeds resort operating hours (close at 2:00 AM).",
+            'violation_type': 'TIME_CONSTRAINT'
+        }
+    
+    # Policy Check 4: Medical restrictions (e.g., spa + heart conditions)
+    medical_restrictions = guest_profile.get('medical_notes', '').lower()
+    if 'heart condition' in medical_restrictions and 'spa' in itinerary_lower:
+        logger.warning(f"Medical alert: {guest_profile.get('name')} has heart condition, spa thermal treatments may need consultation")
+        # Note: We don't block, but flag for concierge review in production
+    
+    return {
+        'valid': True,
+        'message': 'Itinerary passes all policy checks',
+        'violation_type': None
+    }
+
+
 class WynnConciergeAgent:
     """
     Luxury concierge AI agent with sophisticated persona.
@@ -30,6 +100,25 @@ class WynnConciergeAgent:
 
 YOUR MISSION:
 Create a seamless evening itinerary (6:00 PM - 2:00 AM) for the guest based on their request.
+
+OUTPUT FORMAT (MANDATORY):
+You MUST respond with valid JSON in this exact structure:
+{
+  "itinerary": {
+    "events": [
+      {
+        "time": "19:00",
+        "venue_name": "Verde Garden",
+        "venue_type": "Fine Dining",
+        "duration_minutes": 90,
+        "reason": "Matches your preference for romantic settings with exceptional wine selection",
+        "vip_perk": "Reserved the chef's table with complimentary wine pairing"
+      }
+    ]
+  },
+  "guest_message": "Good evening, Ms. Chen. I have taken the liberty of crafting a sophisticated evening that honors your preferences...",
+  "logistics_notes": "Please allow 15 minutes travel time between venues. Dress code: Smart Elegant."
+}
 
 RULES OF ENGAGEMENT (The Human Touch):
 
@@ -61,24 +150,16 @@ AVAILABLE VENUES:
 
 Request: {user_query}
 
-RESPONSE FORMAT:
-Provide a time-sequenced itinerary with:
-- Venue name and category
-- Arrival time
-- Why it matches their request
-- VIP perks (if Black Tier)
-- Brief logistics note (travel time, dress code if strict)
-
-Be conversational, not a bulleted list. Make them feel special."""
+IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code blocks or any text outside the JSON structure."""
     
-    def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-4"):
+    def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-nano-2025-08-07"):
         """
         Initialize the concierge agent.
         
         Args:
             knowledge_base: ResortKnowledgeBase instance
             openai_api_key: OpenAI API key
-            model: OpenAI model to use (default: gpt-4)
+            model: OpenAI model to use (default: gpt-5-nano-2025-08-07)
         """
         self.kb = knowledge_base
         self.llm = ChatOpenAI(
@@ -238,8 +319,59 @@ Be conversational, not a bulleted list. Make them feel special."""
             response = self.llm.invoke(messages)
             itinerary = response.content
             
-            logger.info("✅ Itinerary created successfully")
-            return itinerary
+            # ============================================================================
+            # SENIOR ENGINEER FIX #1: Policy Validation Before Returning
+            # ============================================================================
+            # Validate itinerary against business rules and compliance policies
+            policy_check = validate_itinerary_policy(itinerary, guest_profile)
+            
+            if not policy_check['valid']:
+                logger.warning(f"⚠️ Policy violation detected: {policy_check['violation_type']}")
+                logger.warning(f"Message: {policy_check['message']}")
+                
+                # Return a professional error message instead of the violating itinerary
+                return f"""I apologize, but I must respectfully adjust your request.
+
+{policy_check['message']}
+
+May I suggest an alternative that would better suit your preferences? Please let me know what type of experience you're looking for, and I'll craft something exceptional for you."""
+            
+            # ============================================================================
+            # SENIOR ENGINEER FIX #3: Parse and Format Structured JSON Output
+            # ============================================================================
+            # Attempt to parse JSON for structured data (system integration ready)
+            try:
+                import json
+                # Try to extract JSON from response (handle potential markdown wrapping)
+                json_text = itinerary
+                if '```json' in itinerary:
+                    json_text = itinerary.split('```json')[1].split('```')[0].strip()
+                elif '```' in itinerary:
+                    json_text = itinerary.split('```')[1].split('```')[0].strip()
+                
+                parsed_itinerary = json.loads(json_text)
+                
+                # Log structured data for system integration
+                logger.info("✅ Structured itinerary data available for downstream systems")
+                logger.debug(f"Events count: {len(parsed_itinerary.get('itinerary', {}).get('events', []))}")
+                
+                # Return the guest message (human-readable) for UI display
+                # In production: Also store parsed_itinerary['itinerary']['events'] in PMS
+                itinerary_display = parsed_itinerary.get('guest_message', itinerary)
+                
+                # Append logistics notes if available
+                logistics = parsed_itinerary.get('logistics_notes')
+                if logistics:
+                    itinerary_display += f"\n\n📋 {logistics}"
+                
+                logger.info("✅ Itinerary created successfully (with structured data)")
+                return itinerary_display
+                
+            except (json.JSONDecodeError, KeyError) as e:
+                # Fallback: Return raw text if JSON parsing fails
+                logger.warning(f"⚠️ JSON parsing failed, returning raw text: {e}")
+                logger.info("✅ Itinerary created successfully (raw text fallback)")
+                return itinerary
             
         except Exception as e:
             logger.error(f"❌ Error creating itinerary: {e}")
@@ -303,7 +435,7 @@ def demo():
     
     # Initialize components
     kb = ResortKnowledgeBase(api_key)
-    agent = WynnConciergeAgent(kb, api_key, model="gpt-4")
+    agent = WynnConciergeAgent(kb, api_key, model="gpt-5-nano-2025-08-07")
     
     # Test guest
     guest = {

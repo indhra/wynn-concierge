@@ -55,7 +55,7 @@ In the Streamlit Cloud dashboard:
 ```toml
 # .streamlit/secrets.toml format
 OPENAI_API_KEY = "sk-your-api-key-here"
-OPENAI_MODEL = "gpt-4"
+OPENAI_MODEL = "gpt-5-nano-2025-08-07"
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 ```
 
@@ -81,7 +81,7 @@ def __init__(self, openai_api_key: str = None, force_rebuild: bool = False):
 
 ```python
 # Similar change in __init__
-def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str = None, model: str = "gpt-4"):
+def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str = None, model: str = "gpt-5-nano-2025-08-07"):
     if openai_api_key is None:
         try:
             openai_api_key = st.secrets["OPENAI_API_KEY"]
@@ -130,13 +130,19 @@ To prevent abuse when sharing with hiring managers:
 
 ### Option C: Add Rate Limiting to App
 
+**NOTE:** Rate limiting is now built-in! The app includes 5 requests/hour per user by default.
+
+To customize the rate limit, modify [`app.py:319`](../src/app.py#L319):
+
 Add to `src/app.py`:
 
 ```python
 # Add after imports
 import time
 
-# Session-based rate limiting
+# Session-based rate limiting (already implemented)
+# See src/app.py for full implementation
+is_allowed, remaining, reset_time = check_rate_limit(guest_name, max_calls=5, time_window_hours=1)
 if 'request_count' not in st.session_state:
     st.session_state.request_count = 0
     st.session_state.last_reset = time.time()

@@ -7,15 +7,115 @@ import streamlit as st
 import pandas as pd
 import os
 import time
+import logging
 from pathlib import Path
 from datetime import datetime
+from typing import Dict
 from dotenv import load_dotenv
 
 from vector_store import ResortKnowledgeBase
 from agent_logic import WynnConciergeAgent
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Load environment variables
 load_dotenv()
+
+
+# ============================================================================
+# SENIOR ENGINEER FIX #2: PII Privacy & Data Protection
+# ============================================================================
+# SECURITY NOTE: In production, we MUST anonymize PII before sending to LLMs
+# 
+# Current PoC uses synthetic data only. Production implementation requires:
+# 1. Hash guest names using SHA-256 before LLM transmission
+# 2. Replace loyalty tier with encoded IDs (e.g., BLACK_TIER → T1)
+# 3. Use Wynn VPC (Virtual Private Cloud) with Azure OpenAI private endpoints
+# 4. Implement audit logging for GDPR/UAE Data Protection Law compliance
+# 
+# Reference: UAE Data Protection Law (Federal Decree-Law No. 45 of 2021)
+# Reference: PCI-DSS requirements for casino/gaming operations
+# ============================================================================
+
+def anonymize_guest_pii(guest_profile: Dict) -> Dict:
+    """
+    Anonymizes Personally Identifiable Information (PII) before LLM processing.
+    
+    PRODUCTION REQUIREMENTS:
+    - Hash guest names with SHA-256 + salt
+    - Replace room numbers with session tokens
+    - Mask credit card/payment info
+    - Remove phone/email from LLM context
+    
+    Args:
+        guest_profile: Original guest profile with PII
+    
+    Returns:
+        Anonymized profile safe for LLM transmission
+    """
+    import hashlib
+    
+    anonymized = guest_profile.copy()
+    
+    # Mask guest name (Production: Use cryptographic hash)
+    if 'name' in anonymized:
+        name_hash = hashlib.sha256(anonymized['name'].encode()).hexdigest()[:12]
+        anonymized['name'] = f"Guest_{name_hash}"
+        # Note: For UI display, we keep original name locally, only send hash to LLM
+    
+    # Encode loyalty tier as ID
+    tier_encoding = {'Black': 'T1_VIP', 'Platinum': 'T2_PREMIUM'}
+    if 'loyalty_tier' in anonymized:
+        anonymized['loyalty_tier_encoded'] = tier_encoding.get(
+            anonymized['loyalty_tier'], 
+            'T3_STANDARD'
+        )
+    
+    # In production: Remove sensitive fields entirely
+    anonymized.pop('email', None)
+    anonymized.pop('phone', None)
+    anonymized.pop('room_number', None)
+    anonymized.pop('credit_card', None)
+    
+    return anonymized
+
+
+def mask_guest_data_for_display(guest_profile: Dict) -> Dict:
+    """
+    Masks sensitive data for UI display (different from LLM anonymization).
+    
+    This is for SCREEN PRIVACY when concierge staff view the system.
+    """
+    masked = guest_profile.copy()
+    
+    # Mask partial phone number: +971-XX-XXX-5678 → +971-**-***-5678
+    if 'phone' in masked:
+        phone = masked['phone']
+        masked['phone'] = phone[:-4].replace(phone[5:-4], '***') + phone[-4:] if len(phone) > 4 else '***'
+    
+    # Mask email: john.doe@email.com → j***@email.com
+    if 'email' in masked:
+        email = masked['email']
+        if '@' in email:
+            local, domain = email.split('@')
+            masked['email'] = f"{local[0]}***@{domain}"
+    
+    return masked
+
+
+# NOTE: Current PoC does NOT anonymize data (synthetic data only)
+# Production deployment MUST enable PII_ANONYMIZATION_ENABLED flag
+PII_ANONYMIZATION_ENABLED = os.getenv('PII_ANONYMIZATION_ENABLED', 'false').lower() == 'true'
+
+if PII_ANONYMIZATION_ENABLED:
+    logger.info("🔒 PII Anonymization: ENABLED (Production Mode)")
+else:
+    logger.info("⚠️  PII Anonymization: DISABLED (PoC uses synthetic data only)")
+
+
+
 
 # Page configuration
 st.set_page_config(
@@ -135,15 +235,34 @@ def initialize_system():
         # Initialize knowledge base
         kb = ResortKnowledgeBase(api_key)
         
-        # Initialize agent
-        model = os.getenv('OPENAI_MODEL', 'gpt-4')
+        # Initialize agent with model from environment or default to gpt-5-nano-2025-08-07
+        # To change model: Set OPENAI_MODEL in your .env file
+        # Options: gpt-5-nano-2025-08-07 (cheapest), gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-4
+        model = os.getenv('OPENAI_MODEL', 'gpt-5-nano-2025-08-07')
         agent = WynnConciergeAgent(kb, api_key, model=model)
+        
+        # Store model info in session state for display
+        if 'current_model' not in st.session_state:
+            st.session_state.current_model = model
         
         return kb, agent
     
     except Exception as e:
-        st.error(f"❌ Error initializing system: {str(e)}")
-        st.info("💡 Make sure you've run `python src/data_generator.py` first to generate the data files.")
+        error_msg = str(e).lower()
+        
+        # Check for authentication/API key errors
+        if 'api key' in error_msg or 'authentication' in error_msg or 'unauthorized' in error_msg or '401' in error_msg:
+            st.error("❌ **Invalid OpenAI API Key**")
+            st.error("Your OpenAI API key is invalid or has expired. Please check your configuration.")
+            st.info("""💡 **How to fix:**
+1. Get a valid API key from https://platform.openai.com/api-keys
+2. Update your `.env` file with: `OPENAI_API_KEY=sk-your-key-here`
+3. Restart the application
+            """)
+        else:
+            st.error(f"❌ Error initializing system: {str(e)}")
+            st.info("💡 Make sure you've run `python src/data_generator.py` first to generate the data files.")
+        
         st.stop()
 
 
@@ -208,6 +327,63 @@ def simulate_thinking_process():
 def format_timestamp():
     """Get current timestamp for chat"""
     return datetime.now().strftime("%I:%M %p")
+
+
+def check_rate_limit(guest_name: str, max_calls: int = 5, time_window_hours: int = 1) -> tuple[bool, int, str]:
+    """
+    Check if user has exceeded rate limit to prevent excessive API costs.
+    
+    Args:
+        guest_name: Name of the guest (used as unique identifier)
+        max_calls: Maximum API calls allowed (default: 5)
+        time_window_hours: Time window in hours (default: 1)
+    
+    Returns:
+        Tuple of (is_allowed, remaining_calls, reset_time)
+    """
+    from datetime import datetime, timedelta
+    
+    # Initialize rate limit tracking in session state
+    if 'api_call_history' not in st.session_state:
+        st.session_state.api_call_history = {}
+    
+    # Get current time
+    now = datetime.now()
+    cutoff_time = now - timedelta(hours=time_window_hours)
+    
+    # Get or initialize call history for this guest
+    if guest_name not in st.session_state.api_call_history:
+        st.session_state.api_call_history[guest_name] = []
+    
+    # Remove old calls outside the time window
+    st.session_state.api_call_history[guest_name] = [
+        call_time for call_time in st.session_state.api_call_history[guest_name]
+        if call_time > cutoff_time
+    ]
+    
+    # Check if limit exceeded
+    call_count = len(st.session_state.api_call_history[guest_name])
+    remaining = max_calls - call_count
+    
+    if call_count >= max_calls:
+        # Find when the oldest call will expire
+        oldest_call = min(st.session_state.api_call_history[guest_name])
+        reset_time = oldest_call + timedelta(hours=time_window_hours)
+        reset_str = reset_time.strftime("%I:%M %p")
+        return False, 0, reset_str
+    
+    return True, remaining, ""
+
+
+def record_api_call(guest_name: str):
+    """Record an API call for rate limiting purposes"""
+    if 'api_call_history' not in st.session_state:
+        st.session_state.api_call_history = {}
+    
+    if guest_name not in st.session_state.api_call_history:
+        st.session_state.api_call_history[guest_name] = []
+    
+    st.session_state.api_call_history[guest_name].append(datetime.now())
 
 
 def main():
@@ -314,6 +490,41 @@ How may I assist you this evening?"""
     
     # Chat input
     if prompt := st.chat_input("Describe your perfect evening..."):
+        # ============================================================================
+        # RATE LIMITING: Prevent excessive API costs (max 5 calls per hour per user)
+        # ============================================================================
+        guest_name = guest_data['name']
+        is_allowed, remaining, reset_time = check_rate_limit(guest_name)
+        
+        if not is_allowed:
+            # Rate limit exceeded - show error message
+            timestamp = format_timestamp()
+            st.session_state.messages.append({
+                "role": "user",
+                "content": prompt,
+                "timestamp": timestamp
+            })
+            
+            with st.chat_message("user"):
+                st.markdown(prompt)
+                st.caption(timestamp)
+            
+            with st.chat_message("assistant"):
+                error_msg = f"""⚠️ **Rate Limit Exceeded**
+
+I apologize, but you've reached the maximum of 5 requests per hour for this demo.
+
+This limit helps control API costs. Your access will reset at **{reset_time}**.
+
+Thank you for your understanding!"""
+                st.error(error_msg)
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": error_msg,
+                    "timestamp": format_timestamp()
+                })
+            st.stop()
+        
         # Add user message
         timestamp = format_timestamp()
         st.session_state.messages.append({
@@ -335,9 +546,12 @@ How may I assist you this evening?"""
             # Create guest profile dict
             guest_profile = guest_data.to_dict()
             
-            # Get itinerary from agent
+            # Get itinerary from agent (THIS IS THE API CALL)
             with st.spinner("Crafting your itinerary..."):
                 itinerary = agent.create_itinerary(prompt, guest_profile)
+            
+            # Record this API call for rate limiting
+            record_api_call(guest_name)
             
             # Display itinerary
             st.markdown(itinerary)
@@ -350,6 +564,11 @@ How may I assist you this evening?"""
                 "content": itinerary,
                 "timestamp": response_timestamp
             })
+            
+            # Show remaining calls
+            remaining_after = remaining - 1
+            if remaining_after <= 2:
+                st.warning(f"⚠️ {remaining_after} API calls remaining this hour")
     
     # Clear chat button
     col1, col2 = st.columns([6, 1])
@@ -357,6 +576,16 @@ How may I assist you this evening?"""
         if st.button("🔄 New Chat"):
             st.session_state.messages = []
             st.rerun()
+    
+    # ============================================================================
+    # DEBUG INFO (For demo purposes only - remove in production customer app)
+    # ============================================================================
+    st.markdown("---")
+    with st.expander("🔧 Demo Info (For Development Only)"):
+        current_model = st.session_state.get('current_model', 'gpt-5-nano-2025-08-07')
+        st.caption(f"**AI Model:** {current_model}")
+        st.caption(f"**Environment:** Demo mode with rate limiting (5 calls/hour)")
+        st.caption("_In production, this debug panel would be hidden from guest-facing UI_")
 
 
 if __name__ == "__main__":

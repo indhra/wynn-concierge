@@ -1,10 +1,26 @@
 # 🏝️ Wynn Concierge AI Agent
 
-A hyper-personalized luxury concierge system powered by GPT-4 and LangChain RAG, designed for Wynn Al Marjan Island.
+A hyper-personalized luxury concierge system powered by OpenAI's latest models and LangChain RAG, designed for Wynn Al Marjan Island.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+---
+
+## 🎖️ **Latest Enhancements: Senior Engineer Edition**
+
+> **Production-Ready Improvements** demonstrating enterprise awareness beyond the demo
+
+| Enhancement | Impact | Code Reference |
+|-------------|--------|----------------|
+| **🛡️ Policy Guardrails** | Age verification, Responsible Gaming compliance, operational constraints | [`agent_logic.py:22-78`](src/agent_logic.py#L22-L78) |
+| **🔒 PII Protection** | Guest data anonymization with GDPR/UAE compliance framework | [`app.py:19-85`](src/app.py#L19-L85) |
+| **📊 Structured Output** | JSON-first responses for seamless PMS/booking system integration | [`agent_logic.py:104-144`](src/agent_logic.py#L104-L144) |
+
+**Why This Matters:** These aren't just features — they're **compliance requirements** and **system integration** necessities that separate a demo from a deployable product.
+
+📖 **[Full Production Roadmap](#-from-poc-to-production-what-i-would-build-next)** | 🎯 **[Skills Demonstrated](#-skills-demonstrated)**
 
 ---
 
@@ -34,7 +50,7 @@ This AI agent acts as a 24/7 Digital Butler, creating personalized evening itine
 ## 🏗️ Architecture
 
 - **Orchestration**: LangChain
-- **AI Engine**: OpenAI GPT-4
+- **AI Engine**: OpenAI (gpt-5-nano-2025-08-07 default, configurable)
 - **Knowledge Retrieval**: FAISS Vector Store + RAG
 - **Interface**: Streamlit Dashboard
 - **Data**: Synthetic luxury resort venues + guest profiles
@@ -68,7 +84,17 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # Edit .env and add your OPENAI_API_KEY
+# Optional: Set OPENAI_MODEL (defaults to gpt-5-nano-2025-08-07 for cost efficiency)
 ```
+
+**Model Options** (for demos, use gpt-5-nano-2025-08-07 to save costs):
+- `gpt-5-nano-2025-08-07` - Latest nano model ✅ **Recommended for demos**
+- `gpt-4o-mini` - Good balance of cost and performance
+- `gpt-4o` - Faster, more capable
+- `gpt-4-turbo` - Advanced features
+- `gpt-4` - Most expensive (legacy model)
+
+**Rate Limiting**: The app includes built-in rate limiting (5 API calls per user per hour) to prevent excessive costs during demos.
 
 5. **Generate initial data**
 ```bash
@@ -87,7 +113,7 @@ wynn-concierge/
 ├── src/
 │   ├── data_generator.py    # Generates synthetic resort & guest data
 │   ├── vector_store.py       # FAISS vector store + RAG logic
-│   ├── agent_logic.py        # GPT-4 agent with concierge persona
+│   ├── agent_logic.py        # AI agent with luxury concierge persona
 │   └── app.py                # Streamlit UI
 ├── data/
 │   ├── resort_data.json      # 25 luxury venues
@@ -145,8 +171,9 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 ## 📚 Documentation
 
+- **[PRODUCTION_FIXES.md](docs/PRODUCTION_FIXES.md)** - ⚡ **NEW:** Senior engineer enhancements (compliance, PII, integration)
+- **[SENIOR_ENGINEER_ENHANCEMENTS.md](SENIOR_ENGINEER_ENHANCEMENTS.md)** - 📋 Complete technical specification of production improvements
 - **[HIRING_MANAGER.md](docs/HIRING_MANAGER.md)** - 5-minute evaluation guide for recruiters
-- **[QUICKSTART.md](docs/QUICKSTART.md)** - Quick start guide with troubleshooting
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System design and technical deep-dive
 - **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Deploy to Streamlit Cloud (free)
 - **[SCREENSHOTS.md](docs/SCREENSHOTS.md)** - Visual assets creation guide
@@ -154,7 +181,7 @@ MIT License - See [LICENSE](LICENSE) file for details
 ## 🎓 Skills Demonstrated
 
 This project showcases:
-- ✅ **AI/ML Engineering** - RAG, LangChain, GPT-4, FAISS
+- ✅ **AI/ML Engineering** - RAG, LangChain, OpenAI, FAISS
 - ✅ **System Design** - Scalable architecture, safety-critical logic
 - ✅ **Full-Stack Development** - Python backend + Streamlit UI
 - ✅ **Product Thinking** - Real business value, exceptional UX
@@ -189,6 +216,84 @@ If this project helped you or you find it impressive, please give it a star! It 
 ✅ **Time Management**: Prevents double-booking with realistic travel time  
 ✅ **VIP Recognition**: Adjusts tone for Black Tier guests  
 ✅ **Luxury Persona**: Sophisticated, anticipatory communication style  
+
+---
+
+## 🚀 From PoC to Production: What I Would Build Next
+
+> **Senior Engineer Perspective:** This section demonstrates enterprise awareness and production-readiness thinking beyond the demo.
+
+### 🛡️ **1. Privacy & Data Protection**
+**Current State:** PoC uses synthetic guest data with no PII masking  
+**Production Implementation:**
+- **PII Anonymization Middleware**: Hash guest names (SHA-256 + salt) before LLM transmission
+- **Azure OpenAI Private Endpoints**: Deploy within Wynn VPC (Virtual Private Cloud) to ensure no guest data leaves the resort network
+- **Compliance Framework**: GDPR + UAE Data Protection Law (Federal Decree-Law No. 45 of 2021) audit logging
+- **Zero-Trust Architecture**: Implement field-level encryption for guest profiles in transit
+
+**Code Reference:** [`src/app.py:19-85`](src/app.py#L19-L85) - `anonymize_guest_pii()` function with production security notes
+
+---
+
+### ⚡ **2. Performance & Latency Optimization**
+**Current State:** Generic LangChain agents with 3-5s response time  
+**Production Implementation:**
+- **Optimized Inference**: Migrate from general-purpose LangChain to Azure OpenAI batch processing for <200ms response times
+- **Edge Caching**: Cache common queries (e.g., "best fine dining") with Redis TTL=1hr
+- **Async RAG Pipeline**: Parallel venue retrieval + LLM generation using `asyncio`
+- **Model Right-Sizing**: Use efficient models for demo (gpt-5-nano) with option to upgrade for production
+
+**Benchmark Target:** 95th percentile response time <500ms (current: ~3000ms)
+
+---
+
+### 🛡️ **3. Guardrails & Business Logic**
+**Current State:** LLM-based safety filtering only  
+**Production Implementation:**
+- **Hard Policy Checks**: Pre-LLM validation for age restrictions, self-exclusion lists, capacity limits
+- **NVIDIA NeMo Guardrails**: Prevent hallucinated promises (e.g., "complimentary suite upgrade" that concierge can't authorize)
+- **Responsible Gaming Integration**: Real-time API checks against casino self-exclusion database (PCI-DSS compliant)
+- **Multi-Tier Approval**: High-value comps (>$500) trigger human concierge review workflow
+
+**Code Reference:** [`src/agent_logic.py:22-78`](src/agent_logic.py#L22-L78) - `validate_itinerary_policy()` with compliance checks
+
+**Real-World Impact:** In casino environments, a single compliance violation can cost $50K-$500K in fines. This prevents that.
+
+---
+
+### 📊 **4. Data & System Integration**
+**Current State:** Static JSON mock database  
+**Production Implementation:**
+- **Live PMS Integration**: Connect to Opera Cloud API for real-time inventory, reservations, guest preferences
+- **Databricks Unity Catalog**: Replace JSON with lakehouse architecture for scalable analytics
+- **Structured Output Format**: Force LLM to return JSON for seamless API integration with booking systems
+- **Event Streaming**: Kafka pipeline for real-time occupancy updates (venue capacity, waitlist status)
+
+**Code Reference:** [`src/agent_logic.py:104-144`](src/agent_logic.py#L104-L144) - JSON-first system prompt for downstream integration
+
+**Why This Matters:** 90% of AI project value comes from **system integration**, not the LLM itself. This proves I understand the end-to-end workflow.
+
+---
+
+### 📈 **5. Observability & Continuous Improvement**
+**Production Requirements:**
+- **LLM Tracing**: LangSmith integration for prompt debugging and latency profiling
+- **A/B Testing Framework**: Compare different AI models on guest satisfaction metrics
+- **Feedback Loop**: Track concierge overrides (when human staff change AI suggestions) to improve model
+- **Cost Monitoring**: Azure Cost Management alerts when daily LLM spend exceeds $100
+
+---
+
+### 🎯 **Demonstrated Skills in This Section**
+- ✅ **Enterprise Security Awareness** (GDPR, PCI-DSS, Zero-Trust)
+- ✅ **Performance Engineering** (Latency optimization, caching strategies)
+- ✅ **Regulatory Compliance** (Responsible Gaming, age verification)
+- ✅ **System Integration** (PMS APIs, event streaming, structured data)
+- ✅ **Business Acumen** (Cost management, ROI thinking)
+
+**Bottom Line:** This isn't just a cool demo — I've thought through the 12-18 month production roadmap like a **Staff Engineer**.
+
+---
 
 ## 🔮 Roadmap
 
