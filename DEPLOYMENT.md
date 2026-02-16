@@ -1,5 +1,11 @@
 # Deploying to Streamlit Cloud (Free)
 
+## ✅ **DEPLOYMENT SUCCESSFUL!**
+
+**🎉 Live URL:** **[https://wynn-concierge.streamlit.app/](https://wynn-concierge.streamlit.app/)** ✨
+
+---
+
 This guide shows how to deploy the Wynn Concierge AI to Streamlit Cloud for instant hiring manager access.
 
 ## Prerequisites

@@ -2,6 +2,27 @@
 
 A hyper-personalized luxury concierge system powered by GPT-4 and LangChain RAG, designed for Wynn Al Marjan Island.
 
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+---
+
+## 🚀 **For Hiring Managers**
+
+**👉 [5-Minute Evaluation Guide](HIRING_MANAGER.md)** - Quick demo scenarios to test the AI
+
+**📺 LIVE DEMO:** **[https://wynn-concierge.streamlit.app/](https://wynn-concierge.streamlit.app/)** ✨
+
+**💡 See it in action:**
+1. Select **Sarah Chen** (Vegetarian guest)
+2. Ask: *"I want a steak dinner and a wild night out"*
+3. Watch the AI gracefully redirect to vegetarian fine dining + nightlife
+
+**Why this matters:** Demonstrates safety-critical AI that prioritizes guest protection over literal request fulfillment.
+
+---
+
 ## 🎯 Overview
 
 This AI agent acts as a 24/7 Digital Butler, creating personalized evening itineraries that account for:
@@ -77,7 +98,54 @@ wynn-concierge/
 ```
 
 ## 🧪 Testing the System
+� Screenshots
 
+> **Note:** After deploying the app, capture screenshots following [SCREENSHOTS.md](SCREENSHOTS.md)
+
+### Guest Selection with VIP Card
+*Black Tier card with gold gradient, dietary restrictions visible*
+
+### The "Intelligence Test" - Vegetarian Redirect
+*AI gracefully sug[LICENSE](LICENSE) file for details
+
+## 📚 Documentation
+
+- **[HIRING_MANAGER.md](HIRING_MANAGER.md)** - 5-minute evaluation guide for recruiters
+- **[QUICKSTART.md](QUICKSTART.md)** - Quick start guide with troubleshooting
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design and technical deep-dive
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deploy to Streamlit Cloud (free)
+- **[SCREENSHOTS.md](SCREENSHOTS.md)** - Visual assets creation guide
+
+## 🎓 Skills Demonstrated
+
+This project showcases:
+- ✅ **AI/ML Engineering** - RAG, LangChain, GPT-4, FAISS
+- ✅ **System Design** - Scalable architecture, safety-critical logic
+- ✅ **Full-Stack Development** - Python backend + Streamlit UI
+- ✅ **Product Thinking** - Real business value, exceptional UX
+- ✅ **Code Quality** - Testing, documentation, best practices
+
+## 👨‍💻 Author
+
+**Indhra Kiranu N A**  
+[github.com/indhra](https://github.com/indhra)
+
+---
+
+## ⭐ Star This Repo
+
+If this project helped you or you find it impressive, please give it a star! It helps others discover it.** - Instructions for capturing visual assets
+
+## 🏗️ Architecture & Design
+
+**[View Complete Architecture](ARCHITECTURE.md)** - System design, data flow, and technical decisions
+
+**Key Highlights:**
+- **RAG Pattern**: FAISS vector search with semantic matching
+- **Safety-Critical Design**: Multi-layer filtering (allergies → dietary → preferences)
+- **Production-Ready**: Error handling, logging, rate limiting, deployment scripts
+
+## �
 **Test Scenario**: Vegetarian guest requesting steak dinner
 
 1. Select a guest with "Vegetarian" dietary restriction
