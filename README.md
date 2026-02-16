@@ -91,11 +91,11 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 # Edit .env and add your OPENAI_API_KEY
-# Optional: Set OPENAI_MODEL (defaults to gpt-5-nano-2025-08-07 for cost efficiency)
+# Optional: Set OPENAI_MODEL (defaults to gpt-5-nano for cost efficiency)
 ```
 
-**Model Options** (for demos, use gpt-5-nano-2025-08-07 to save costs):
-- `gpt-5-nano-2025-08-07` - Latest nano model ✅ **Recommended for demos**
+**Model Options** (for demos, use gpt-5-nano to save costs):
+- `gpt-5-nano` - Latest nano model ✅ **Recommended for demos**
 - `gpt-4o-mini` - Good balance of cost and performance
 - `gpt-4o` - Faster, more capable
 - `gpt-4-turbo` - Advanced features
