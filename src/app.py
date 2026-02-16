@@ -12,7 +12,7 @@ import json
 import csv
 from pathlib import Path
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Tuple
 from dotenv import load_dotenv
 
 from vector_store import ResortKnowledgeBase
@@ -417,7 +417,7 @@ def format_timestamp():
     return datetime.now().strftime("%I:%M %p")
 
 
-def check_rate_limit(guest_name: str, max_calls: int = 5, time_window_hours: int = 1) -> tuple[bool, int, str]:
+def check_rate_limit(guest_name: str, max_calls: int = 5, time_window_hours: int = 1) -> Tuple[bool, int, str]:
     """
     Check if user has exceeded rate limit to prevent excessive API costs.
     
@@ -430,6 +430,11 @@ def check_rate_limit(guest_name: str, max_calls: int = 5, time_window_hours: int
         Tuple of (is_allowed, remaining_calls, reset_time)
     """
     from datetime import datetime, timedelta
+    
+    # Input validation
+    if not guest_name or not isinstance(guest_name, str):
+        logger.warning("Invalid guest_name for rate limiting")
+        return True, max_calls, ""  # Allow by default if invalid input
     
     # Initialize rate limit tracking in session state
     if 'api_call_history' not in st.session_state:

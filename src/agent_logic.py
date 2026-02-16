@@ -4,8 +4,9 @@ GPT-4 powered agent with luxury concierge persona
 """
 
 import logging
+import json
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import re
 
 from langchain_openai import ChatOpenAI
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 # Management System (PMS) and Responsible Gaming databases.
 # ============================================================================
 
-def validate_itinerary_policy(itinerary_text: str, guest_profile: Dict) -> Dict[str, any]:
+def validate_itinerary_policy(itinerary_text: str, guest_profile: Dict) -> Dict[str, Any]:
     """
     Validates itinerary against business rules and compliance policies.
     
@@ -170,7 +171,7 @@ IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code b
         )
         logger.info(f"✅ Concierge agent initialized with {model}")
     
-    def _parse_timeframe(self, query: str) -> tuple[str, str]:
+    def _parse_timeframe(self, query: str) -> tuple:
         """
         Parse timeframe from query (basic implementation).
         Returns (start_time, end_time) in HH:MM format.
@@ -286,6 +287,14 @@ IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code b
         Returns:
             Formatted itinerary as a string
         """
+        # Input validation
+        if not isinstance(guest_profile, dict):
+            logger.error("Invalid guest_profile type: expected dict")
+            return "I apologize, but there was an error with the guest profile. Please try again."
+        
+        if not user_query or not user_query.strip():
+            return "I apologize, but I didn't catch your request. Could you please tell me what you're looking for this evening?"
+        
         logger.info(f"🎯 Creating itinerary for {guest_profile.get('name', 'Guest')}: '{user_query}'")
         
         # Extract intent

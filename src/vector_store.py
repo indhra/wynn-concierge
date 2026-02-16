@@ -6,7 +6,7 @@ RAG-based knowledge retrieval with guest-aware filtering
 import json
 import logging
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 import time
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -175,7 +175,7 @@ class ResortKnowledgeBase:
         
         return vector_store
     
-    def _check_dietary_safety(self, venue: Dict, dietary_restrictions: str) -> tuple[bool, Optional[str]]:
+    def _check_dietary_safety(self, venue: Dict, dietary_restrictions: str) -> Tuple[bool, Optional[str]]:
         """
         Check if venue is safe for guest's dietary restrictions.
         
@@ -243,6 +243,15 @@ class ResortKnowledgeBase:
         Returns:
             List of venue dictionaries with safety notes
         """
+        # Input validation
+        if not query or not query.strip():
+            logger.warning("Empty search query provided")
+            return []
+        
+        if k <= 0:
+            logger.warning(f"Invalid k value: {k}, using default k=5")
+            k = 5
+        
         # Perform semantic search
         results = self.vector_store.similarity_search(query, k=k*2)  # Get more for filtering
         
