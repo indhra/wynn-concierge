@@ -165,7 +165,7 @@ IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code b
         self.llm = ChatOpenAI(
             openai_api_key=openai_api_key,
             model=model,
-            temperature=0.7,  # Some creativity for natural language
+            # Note: gpt-5-nano models only support default temperature (1)
             max_completion_tokens=1500
         )
         logger.info(f"✅ Concierge agent initialized with {model}")
