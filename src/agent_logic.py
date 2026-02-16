@@ -95,30 +95,30 @@ class WynnConciergeAgent:
     Creates personalized itineraries with safety and logistics validation.
     """
     
-    # System prompt defining the persona
-    SYSTEM_PROMPT = """You are the Chief Concierge at Wynn Al Marjan Island. You are sophisticated, anticipatory, and discreet.
+    # System prompt template with safe placeholders (avoids format() conflicts with JSON braces)
+    SYSTEM_PROMPT_TEMPLATE = """You are the Chief Concierge at Wynn Al Marjan Island. You are sophisticated, anticipatory, and discreet.
 
 YOUR MISSION:
 Create a seamless evening itinerary (6:00 PM - 2:00 AM) for the guest based on their request.
 
 OUTPUT FORMAT (MANDATORY):
 You MUST respond with valid JSON in this exact structure:
-{{
-  "itinerary": {{
+{
+  "itinerary": {
     "events": [
-      {{
+      {
         "time": "19:00",
         "venue_name": "Verde Garden",
         "venue_type": "Fine Dining",
         "duration_minutes": 90,
         "reason": "Matches your preference for romantic settings with exceptional wine selection",
         "vip_perk": "Reserved the chef's table with complimentary wine pairing"
-      }}
+      }
     ]
-  }},
+  },
   "guest_message": "Good evening, Ms. Chen. I have taken the liberty of crafting a sophisticated evening that honors your preferences...",
   "logistics_notes": "Please allow 15 minutes travel time between venues. Dress code: Smart Elegant."
-}}
+}
 
 RULES OF ENGAGEMENT (The Human Touch):
 
@@ -140,15 +140,15 @@ RULES OF ENGAGEMENT (The Human Touch):
    "While [Venue X] is exceptional, given your dietary preferences, I have instead secured a table at [Alternative Y], which offers..."
 
 Current Guest Context:
-Name: {guest_name}
-Tier: {loyalty_tier}
-Restrictions: {dietary_restrictions}
-Preferences: {preferences}
+Name: <<GUEST_NAME>>
+Tier: <<LOYALTY_TIER>>
+Restrictions: <<DIETARY_RESTRICTIONS>>
+Preferences: <<PREFERENCES>>
 
 AVAILABLE VENUES:
-{venues_context}
+<<VENUES_CONTEXT>>
 
-Request: {user_query}
+Request: <<USER_QUERY>>
 
 IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code blocks or any text outside the JSON structure."""
     
@@ -300,15 +300,14 @@ IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code b
         # Format venues context
         venues_context = self._format_venues_context(venues)
         
-        # Build the prompt
-        prompt = self.SYSTEM_PROMPT.format(
-            guest_name=guest_profile.get('name', 'Guest'),
-            loyalty_tier=guest_profile.get('loyalty_tier', 'Platinum'),
-            dietary_restrictions=guest_profile.get('dietary_restrictions', 'None'),
-            preferences=guest_profile.get('preferences', 'N/A'),
-            venues_context=venues_context,
-            user_query=user_query
-        )
+        # Build the prompt using safe string replacement (avoids .format() brace conflicts)
+        prompt = self.SYSTEM_PROMPT_TEMPLATE
+        prompt = prompt.replace('<<GUEST_NAME>>', guest_profile.get('name', 'Guest'))
+        prompt = prompt.replace('<<LOYALTY_TIER>>', guest_profile.get('loyalty_tier', 'Platinum'))
+        prompt = prompt.replace('<<DIETARY_RESTRICTIONS>>', guest_profile.get('dietary_restrictions', 'None'))
+        prompt = prompt.replace('<<PREFERENCES>>', guest_profile.get('preferences', 'N/A'))
+        prompt = prompt.replace('<<VENUES_CONTEXT>>', venues_context)
+        prompt = prompt.replace('<<USER_QUERY>>', user_query)
         
         # Get LLM response
         messages = [
