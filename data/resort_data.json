@@ -1,0 +1,754 @@
+[
+  {
+    "id": "fd_001",
+    "name": "The Obsidian Steakhouse",
+    "category": "Fine Dining",
+    "description": "A carnivore's paradise featuring USDA Prime aged steaks, floor-to-ceiling wine cellar with 3,000+ bottles, and intimate leather booths. Signature dish: 45-day dry-aged Tomahawk ribeye with black truffle butter.",
+    "tags": [
+      "Romantic",
+      "Sophisticated",
+      "Wine-Focused",
+      "Quiet"
+    ],
+    "dietary_options": [
+      "Gluten-Free Options"
+    ],
+    "allergen_warnings": [
+      "Contains Dairy",
+      "Contains Shellfish (sides)"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": true,
+      "dress_code_strict": true
+    },
+    "opening_hours": "18:00-23:00",
+    "average_duration_minutes": 120,
+    "price_tier": "$$$$",
+    "vip_perks": "Chef's table access, complimentary wine pairing"
+  },
+  {
+    "id": "fd_002",
+    "name": "Verde Garden",
+    "category": "Fine Dining",
+    "description": "Plant-forward fine dining showcasing organic vegetables from our rooftop garden. Michelin-trained chef creates artful vegetarian and vegan tasting menus. Features edible flowers and house-made nut cheeses.",
+    "tags": [
+      "Romantic",
+      "Healthy",
+      "Vegan-Friendly",
+      "Vegetarian",
+      "Garden Views"
+    ],
+    "dietary_options": [
+      "Vegetarian",
+      "Vegan",
+      "Gluten-Free",
+      "Nut-Free Available"
+    ],
+    "allergen_warnings": [
+      "May contain nuts (specify when ordering)"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": true
+    },
+    "opening_hours": "18:00-22:30",
+    "average_duration_minutes": 105,
+    "price_tier": "$$$",
+    "vip_perks": "Private garden table, meet-the-chef experience"
+  },
+  {
+    "id": "fd_003",
+    "name": "Sakura Omakase",
+    "category": "Fine Dining",
+    "description": "Intimate 12-seat sushi counter helmed by Tokyo-trained Itamae. Daily fish flown from Tsukiji Market. Traditional Edomae-style omakase with wasabi grated fresh from root.",
+    "tags": [
+      "Authentic",
+      "Quiet",
+      "Sophisticated",
+      "Seafood-Focused"
+    ],
+    "dietary_options": [
+      "Gluten-Free Soy Sauce"
+    ],
+    "allergen_warnings": [
+      "Raw Fish",
+      "Shellfish",
+      "Soy",
+      "Sesame"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": true,
+      "dress_code_strict": true
+    },
+    "opening_hours": "18:30-22:00",
+    "average_duration_minutes": 90,
+    "price_tier": "$$$$$",
+    "vip_perks": "Extended 18-course menu, sake pairing included"
+  },
+  {
+    "id": "fd_004",
+    "name": "Côte d'Azur",
+    "category": "Fine Dining",
+    "description": "French Riviera-inspired seafood restaurant with floor-to-ceiling aquarium views. Specializes in bouillabaisse, Dover sole meunière, and Grand Plateau de fruits de mer. Live harpist evenings.",
+    "tags": [
+      "Romantic",
+      "Seafood-Focused",
+      "Elegant",
+      "Waterfront",
+      "Live Music"
+    ],
+    "dietary_options": [
+      "Gluten-Free Available"
+    ],
+    "allergen_warnings": [
+      "Shellfish",
+      "Fish",
+      "Dairy",
+      "Garlic"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": true
+    },
+    "opening_hours": "17:30-23:00",
+    "average_duration_minutes": 110,
+    "price_tier": "$$$$",
+    "vip_perks": "Champagne sabrage ceremony, chef's amuse-bouche"
+  },
+  {
+    "id": "fd_005",
+    "name": "Silk Road Pavilion",
+    "category": "Fine Dining",
+    "description": "Modern Asian fusion blending Cantonese, Thai, and Vietnamese haute cuisine. Features a theatrical Peking duck service and molecular cocktails with Asian botanicals.",
+    "tags": [
+      "Exotic",
+      "Sophisticated",
+      "Theatrical",
+      "Spicy Options"
+    ],
+    "dietary_options": [
+      "Vegetarian Options",
+      "Gluten-Free Available"
+    ],
+    "allergen_warnings": [
+      "Peanuts",
+      "Shellfish",
+      "Soy",
+      "Sesame"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": true
+    },
+    "opening_hours": "18:00-23:00",
+    "average_duration_minutes": 100,
+    "price_tier": "$$$$",
+    "vip_perks": "Private tea ceremony, chef's special dim sum cart"
+  },
+  {
+    "id": "fd_006",
+    "name": "Tartufo Nero",
+    "category": "Fine Dining",
+    "description": "Contemporary Italian celebrating white and black truffles year-round. Hand-rolled pastas, wood-fired meats, and an Italian wine list curated by a certified sommelier. Truffle shaved tableside.",
+    "tags": [
+      "Romantic",
+      "Sophisticated",
+      "Wine-Focused",
+      "Intimate"
+    ],
+    "dietary_options": [
+      "Vegetarian Options",
+      "Gluten-Free Pasta"
+    ],
+    "allergen_warnings": [
+      "Dairy",
+      "Eggs",
+      "Gluten",
+      "Nuts in desserts"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": true
+    },
+    "opening_hours": "18:00-23:00",
+    "average_duration_minutes": 110,
+    "price_tier": "$$$$",
+    "vip_perks": "Premium truffle supplement included, wine cellar tour"
+  },
+  {
+    "id": "fd_007",
+    "name": "Ember & Oak",
+    "category": "Fine Dining",
+    "description": "Live-fire cooking showcasing heritage grains, artisan cheeses, and wood-roasted proteins. Open kitchen with custom-built hearth. Sommelier specializes in natural and biodynamic wines.",
+    "tags": [
+      "Rustic-Elegant",
+      "Farm-to-Table",
+      "Warm Ambiance",
+      "Wine-Focused"
+    ],
+    "dietary_options": [
+      "Vegetarian Options",
+      "Gluten-Free Available"
+    ],
+    "allergen_warnings": [
+      "Dairy",
+      "Nuts",
+      "Shellfish"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "17:30-22:30",
+    "average_duration_minutes": 100,
+    "price_tier": "$$$",
+    "vip_perks": "Chef's counter seating, complimentary cheese board"
+  },
+  {
+    "id": "fd_008",
+    "name": "Al Safina",
+    "category": "Fine Dining",
+    "description": "Elevated Emirati cuisine reimagining traditional Gulf flavors. Features saffron-infused lamb ouzi, hammour machboos, and date-based desserts. Outdoor majlis seating with Arabian Gulf views.",
+    "tags": [
+      "Cultural",
+      "Authentic",
+      "Waterfront",
+      "Family-Friendly",
+      "Outdoor Seating"
+    ],
+    "dietary_options": [
+      "Halal",
+      "Vegetarian Options"
+    ],
+    "allergen_warnings": [
+      "Nuts",
+      "Dairy",
+      "Sesame"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "18:30-23:30",
+    "average_duration_minutes": 95,
+    "price_tier": "$$$",
+    "vip_perks": "Private majlis section, traditional coffee service"
+  },
+  {
+    "id": "cd_001",
+    "name": "The Lakeside Bistro",
+    "category": "Casual Dining",
+    "description": "All-day Mediterranean-American bistro with lake and fountain views. Known for brunch, wood-fired pizzas, and shareable plates. Full bar with craft cocktails.",
+    "tags": [
+      "Relaxed",
+      "Family-Friendly",
+      "Outdoor Seating",
+      "Brunch",
+      "Lake Views"
+    ],
+    "dietary_options": [
+      "Vegetarian",
+      "Vegan Options",
+      "Gluten-Free",
+      "Kids Menu"
+    ],
+    "allergen_warnings": [
+      "Dairy",
+      "Gluten",
+      "Shellfish"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "07:00-23:00",
+    "average_duration_minutes": 75,
+    "price_tier": "$$",
+    "vip_perks": "Priority seating, complimentary appetizer"
+  },
+  {
+    "id": "cd_002",
+    "name": "Noodle & Dumpling House",
+    "category": "Casual Dining",
+    "description": "Authentic Chinese noodle bar with hand-pulled noodles made to order. Specializes in xiaolongbao, dan dan noodles, and wok-fried dishes. Open kitchen, counter seating.",
+    "tags": [
+      "Casual",
+      "Authentic",
+      "Quick Service",
+      "Asian",
+      "Comfort Food"
+    ],
+    "dietary_options": [
+      "Vegetarian Options",
+      "Spice Levels Customizable"
+    ],
+    "allergen_warnings": [
+      "Peanuts",
+      "Soy",
+      "Sesame",
+      "Shellfish",
+      "Gluten"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "11:00-22:30",
+    "average_duration_minutes": 45,
+    "price_tier": "$",
+    "vip_perks": "Skip-the-line access, complimentary tea"
+  },
+  {
+    "id": "cd_003",
+    "name": "Shoreline Grill",
+    "category": "Casual Dining",
+    "description": "Beachside grill serving fresh catches, burgers, and tropical cocktails. Feet-in-sand dining with live acoustic music on weekends. Sunset views.",
+    "tags": [
+      "Beachfront",
+      "Casual",
+      "Live Music",
+      "Seafood",
+      "Outdoor Seating",
+      "Sunset Views"
+    ],
+    "dietary_options": [
+      "Gluten-Free Buns",
+      "Vegetarian Options"
+    ],
+    "allergen_warnings": [
+      "Shellfish",
+      "Fish",
+      "Dairy",
+      "Gluten"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "12:00-23:00",
+    "average_duration_minutes": 70,
+    "price_tier": "$$",
+    "vip_perks": "Reserved beach cabana, premium cocktail included"
+  },
+  {
+    "id": "cd_004",
+    "name": "Paladino's Pizzeria",
+    "category": "Casual Dining",
+    "description": "Neapolitan-style pizzeria with imported Italian ingredients. Wood-fired oven reaching 900°F. Classic margherita, inventive seasonal pies, and Italian craft beers.",
+    "tags": [
+      "Casual",
+      "Family-Friendly",
+      "Italian",
+      "Quick Service",
+      "Lively"
+    ],
+    "dietary_options": [
+      "Vegetarian",
+      "Vegan Cheese",
+      "Gluten-Free Crust"
+    ],
+    "allergen_warnings": [
+      "Gluten",
+      "Dairy",
+      "Tomatoes"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "11:30-23:00",
+    "average_duration_minutes": 50,
+    "price_tier": "$$",
+    "vip_perks": "Chef's special pie, skip-the-line"
+  },
+  {
+    "id": "cd_005",
+    "name": "Green Market Café",
+    "category": "Casual Dining",
+    "description": "Health-focused café with organic salads, grain bowls, cold-pressed juices, and smoothies. Vegan and raw food options. Bright, airy space with communal tables.",
+    "tags": [
+      "Healthy",
+      "Vegan-Friendly",
+      "Vegetarian",
+      "Casual",
+      "Quick Service"
+    ],
+    "dietary_options": [
+      "Vegan",
+      "Vegetarian",
+      "Gluten-Free",
+      "Organic",
+      "Nut-Free Available"
+    ],
+    "allergen_warnings": [
+      "Nuts",
+      "Soy"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "07:00-21:00",
+    "average_duration_minutes": 40,
+    "price_tier": "$",
+    "vip_perks": "Complimentary wellness shot"
+  },
+  {
+    "id": "cd_006",
+    "name": "The Burger & Bourbon Bar",
+    "category": "Casual Dining",
+    "description": "American gastropub featuring gourmet burgers, loaded fries, and 100+ bourbons. Sports viewing area with large screens. Late-night menu until 2 AM.",
+    "tags": [
+      "Casual",
+      "Lively",
+      "Sports Bar",
+      "Late Night",
+      "American"
+    ],
+    "dietary_options": [
+      "Gluten-Free Buns",
+      "Vegetarian Burger"
+    ],
+    "allergen_warnings": [
+      "Gluten",
+      "Dairy",
+      "Eggs",
+      "Soy"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "11:00-02:00",
+    "average_duration_minutes": 70,
+    "price_tier": "$$",
+    "vip_perks": "Reserved booth, bourbon flight included"
+  },
+  {
+    "id": "nl_001",
+    "name": "XS Skyline",
+    "category": "Nightlife",
+    "description": "Ultra-luxury nightclub with celebrity DJs, pyrotechnics, and stunning city views. Three-level venue featuring VIP tables, a golden dance floor, and premium bottle service.",
+    "tags": [
+      "Energetic",
+      "Loud",
+      "DJ",
+      "Dancing",
+      "VIP Experience",
+      "Late Night"
+    ],
+    "dietary_options": [],
+    "allergen_warnings": [
+      "Alcohol"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": true,
+      "dress_code_strict": true
+    },
+    "opening_hours": "22:00-04:00",
+    "average_duration_minutes": 180,
+    "price_tier": "$$$$$",
+    "vip_perks": "Table minimum waived, dedicated host, priority entry"
+  },
+  {
+    "id": "nl_002",
+    "name": "The Jazz Lounge",
+    "category": "Nightlife",
+    "description": "Intimate speakeasy-style jazz club featuring live bands nightly. Craft cocktails, premium cigars, and velvet booths. Tribute to the golden age of jazz.",
+    "tags": [
+      "Sophisticated",
+      "Live Music",
+      "Romantic",
+      "Quiet Conversations",
+      "Intimate"
+    ],
+    "dietary_options": [
+      "Light bites menu"
+    ],
+    "allergen_warnings": [
+      "Alcohol",
+      "Nuts in snacks"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": true,
+      "dress_code_strict": true
+    },
+    "opening_hours": "20:00-02:00",
+    "average_duration_minutes": 120,
+    "price_tier": "$$$",
+    "vip_perks": "Front-row table, meet-the-band pass"
+  },
+  {
+    "id": "nl_003",
+    "name": "Mirage Rooftop",
+    "category": "Nightlife",
+    "description": "Open-air rooftop bar on the 25th floor with 360° panoramic views. Signature molecular mixology, hookah service, and resident DJ spinning deep house.",
+    "tags": [
+      "Rooftop",
+      "Scenic Views",
+      "Trendy",
+      "DJ",
+      "Outdoor"
+    ],
+    "dietary_options": [
+      "Tapas menu available"
+    ],
+    "allergen_warnings": [
+      "Alcohol",
+      "Shellfish",
+      "Nuts"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": true,
+      "dress_code_strict": true
+    },
+    "opening_hours": "18:00-03:00",
+    "average_duration_minutes": 120,
+    "price_tier": "$$$",
+    "vip_perks": "Reserved skybox, unlimited tapas"
+  },
+  {
+    "id": "nl_004",
+    "name": "Lucky Dragon Casino Lounge",
+    "category": "Nightlife",
+    "description": "High-limit casino floor lounge with complimentary premium cocktails for players. Live dealer tables, baccarat salons, and private gaming rooms.",
+    "tags": [
+      "Casino",
+      "Sophisticated",
+      "Gaming",
+      "VIP Experience"
+    ],
+    "dietary_options": [
+      "Complimentary bar snacks"
+    ],
+    "allergen_warnings": [
+      "Alcohol",
+      "Nuts"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": true,
+      "dress_code_strict": false
+    },
+    "opening_hours": "24/7",
+    "average_duration_minutes": 180,
+    "price_tier": "$$$$",
+    "vip_perks": "High-limit table access, dedicated dealer"
+  },
+  {
+    "id": "nl_005",
+    "name": "Velvet Underground",
+    "category": "Nightlife",
+    "description": "Underground techno and house music club with world-class sound system. Industrial-chic design, fog machines, and immersive lighting. No-photos policy for privacy.",
+    "tags": [
+      "Energetic",
+      "Loud",
+      "DJ",
+      "Dancing",
+      "Edgy",
+      "Late Night"
+    ],
+    "dietary_options": [],
+    "allergen_warnings": [
+      "Alcohol",
+      "Strobe lights"
+    ],
+    "constraints": {
+      "requires_reservation": false,
+      "adults_only": true,
+      "dress_code_strict": false
+    },
+    "opening_hours": "23:00-05:00",
+    "average_duration_minutes": 210,
+    "price_tier": "$$$",
+    "vip_perks": "VIP booth, bottle service discount"
+  },
+  {
+    "id": "sp_001",
+    "name": "Serenity Spa & Hammam",
+    "category": "Spa",
+    "description": "World-class spa featuring traditional Moroccan hammam, thermal pools, and signature treatments. Offers couple's massages, facials using organic ingredients, and meditation sessions.",
+    "tags": [
+      "Relaxing",
+      "Luxurious",
+      "Couples-Friendly",
+      "Quiet",
+      "Wellness"
+    ],
+    "dietary_options": [
+      "Wellness tea menu",
+      "Organic juice bar"
+    ],
+    "allergen_warnings": [
+      "Essential oils",
+      "Nuts in products"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "08:00-21:00",
+    "average_duration_minutes": 90,
+    "price_tier": "$$$$",
+    "vip_perks": "Extended 120-min treatments, private suite"
+  },
+  {
+    "id": "sp_002",
+    "name": "Vitality Fitness & Recovery",
+    "category": "Spa",
+    "description": "State-of-the-art fitness center with cryotherapy, infrared saunas, and sports recovery treatments. Personal training, yoga studios, and nutritionist consultations available.",
+    "tags": [
+      "Athletic",
+      "Wellness",
+      "Modern",
+      "Energizing"
+    ],
+    "dietary_options": [
+      "Protein shakes",
+      "Recovery supplements"
+    ],
+    "allergen_warnings": [
+      "Dairy in shakes",
+      "Soy"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "06:00-22:00",
+    "average_duration_minutes": 60,
+    "price_tier": "$$$",
+    "vip_perks": "Complimentary cryo session, private locker"
+  },
+  {
+    "id": "sp_003",
+    "name": "Aqua Sanctuary",
+    "category": "Spa",
+    "description": "Adults-only pool oasis with infinity pools, private cabanas, and poolside butler service. Underwater music, misting stations, and frozen cocktail delivery.",
+    "tags": [
+      "Relaxing",
+      "Luxurious",
+      "Poolside",
+      "Outdoor",
+      "Adults-Only"
+    ],
+    "dietary_options": [
+      "Light spa cuisine",
+      "Tropical cocktails"
+    ],
+    "allergen_warnings": [
+      "Alcohol",
+      "Shellfish in menu",
+      "Nuts"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": true,
+      "dress_code_strict": false
+    },
+    "opening_hours": "09:00-19:00",
+    "average_duration_minutes": 180,
+    "price_tier": "$$$",
+    "vip_perks": "Premium cabana, complimentary champagne"
+  },
+  {
+    "id": "sh_001",
+    "name": "The Grand Theatre",
+    "category": "Shows",
+    "description": "1,800-seat theater hosting Broadway tours, Cirque-style acrobatics, and resident headliners. State-of-the-art sound and projection mapping technology.",
+    "tags": [
+      "Entertainment",
+      "Family-Friendly",
+      "Spectacular",
+      "Cultural"
+    ],
+    "dietary_options": [
+      "Concessions available"
+    ],
+    "allergen_warnings": [
+      "Popcorn",
+      "Candy"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "19:00-22:30",
+    "average_duration_minutes": 120,
+    "price_tier": "$$$",
+    "vip_perks": "VIP seating, backstage meet-and-greet"
+  },
+  {
+    "id": "sh_002",
+    "name": "Comedy Cellar",
+    "category": "Shows",
+    "description": "Intimate 200-seat comedy club featuring touring comedians and surprise celebrity drop-ins. Two shows nightly, full bar service, brick wall backdrop.",
+    "tags": [
+      "Funny",
+      "Intimate",
+      "Adults-Only",
+      "Casual"
+    ],
+    "dietary_options": [
+      "Bar menu with appetizers"
+    ],
+    "allergen_warnings": [
+      "Alcohol",
+      "Gluten in snacks"
+    ],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": true,
+      "dress_code_strict": false
+    },
+    "opening_hours": "20:00-23:30",
+    "average_duration_minutes": 90,
+    "price_tier": "$$",
+    "vip_perks": "Front-row seating, meet-the-comedian"
+  },
+  {
+    "id": "sh_003",
+    "name": "Aqua Dreams",
+    "category": "Shows",
+    "description": "Breathtaking water-based theatrical show combining synchronized swimming, aerial acrobatics, and holographic projections. Custom-built circular pool theater.",
+    "tags": [
+      "Spectacular",
+      "Family-Friendly",
+      "Unique",
+      "Romantic"
+    ],
+    "dietary_options": [
+      "Pre-show dining package available"
+    ],
+    "allergen_warnings": [],
+    "constraints": {
+      "requires_reservation": true,
+      "adults_only": false,
+      "dress_code_strict": false
+    },
+    "opening_hours": "19:30-21:00",
+    "average_duration_minutes": 90,
+    "price_tier": "$$$$",
+    "vip_perks": "Premium center seating, souvenir gift"
+  }
+]
