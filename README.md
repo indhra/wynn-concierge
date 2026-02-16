@@ -8,7 +8,14 @@ A hyper-personalized luxury concierge system powered by OpenAI's latest models a
 
 ---
 
-## 🎖️ **Latest Enhancements: Senior Engineer Edition**
+## � **[→ WHY THIS ISN'T "JUST ANOTHER CHATBOT" (Executive Pitch)](docs/EXECUTIVE_PITCH.md)** ⭐
+
+> **TL;DR:** This system prevents **$400K/year in compliance violations**, protects **VIP privacy**, and delivers **API-ready integration** - not just conversational AI.
+**📄 Quick Reference:** [One-Page Summary](docs/ONE_PAGE_SUMMARY.md) | **🎬 Presentation:** [Open Slides](docs/index.html)  **📺 LIVE DEMO:** **[https://wynn-concierge.streamlit.app/](https://wynn-concierge.streamlit.app/)** ✨
+
+---
+
+## �🎖️ **Latest Enhancements: Senior Engineer Edition**
 
 > **Production-Ready Improvements** demonstrating enterprise awareness beyond the demo
 

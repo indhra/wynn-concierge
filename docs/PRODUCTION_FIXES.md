@@ -2,6 +2,8 @@
 
 ## 3 Critical Fixes That Prove Senior Engineer Thinking
 
+> **🏆 Looking for the business impact?** See [Executive Pitch](EXECUTIVE_PITCH.md) or [One-Page Summary](ONE_PAGE_SUMMARY.md)
+
 ---
 
 ### 🛡️ Fix #1: Business Logic Guardrails

@@ -4,6 +4,8 @@
 
 This document details **production-readiness improvements** that demonstrate enterprise-level thinking beyond a functional demo. These enhancements address the three critical gaps that separate PoCs from deployable systems.
 
+> **🏆 For business impact & ROI:** See [Executive Pitch](EXECUTIVE_PITCH.md) | **📄 Quick Reference:** [One-Page Summary](ONE_PAGE_SUMMARY.md)
+
 ---
 
 ## 🛡️ Enhancement #1: Policy Validation & Compliance Guardrails

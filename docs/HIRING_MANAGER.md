@@ -2,6 +2,8 @@
 
 **5-Minute Evaluation Guide**
 
+> **First time here?** Start with the [One-Page Summary](ONE_PAGE_SUMMARY.md) | **Want business impact?** See [Executive Pitch](EXECUTIVE_PITCH.md)
+
 ---
 
 ## What You're Looking At
