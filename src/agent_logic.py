@@ -1,6 +1,8 @@
 """
 Wynn Concierge Agent Logic
 GPT-4 powered agent with luxury concierge persona
+
+Version: 1.0.1 - Temperature parameter fix for gpt-5-nano
 """
 
 import logging

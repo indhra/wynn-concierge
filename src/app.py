@@ -275,7 +275,7 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 GUESTS_FILE = DATA_DIR / "guests.csv"
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def initialize_system():
     """
     Initialize the knowledge base and agent (cached globally).
@@ -283,6 +283,8 @@ def initialize_system():
     st.cache_resource doesn't pickle return values - it returns the same
     instance, making it perfect for non-serializable objects like FAISS with
     OpenAI embeddings. The cache is shared across all users/sessions.
+    
+    Version: 1.0.1 - Temperature fix for gpt-5-nano compatibility
     """
     api_key = os.getenv('OPENAI_API_KEY')
     
