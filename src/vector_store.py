@@ -7,7 +7,7 @@ import json
 import logging
 from pathlib import Path
 from typing import List, Dict, Optional
-import pickle
+import time
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Paths
 DATA_DIR = Path(__file__).parent.parent / "data"
-VECTOR_STORE_PATH = DATA_DIR / "faiss_index.pkl"
+VECTOR_STORE_DIR = DATA_DIR / "faiss_index"
 
 
 class ResortKnowledgeBase:
@@ -39,14 +39,16 @@ class ResortKnowledgeBase:
         """
         self.embeddings = OpenAIEmbeddings(
             openai_api_key=openai_api_key,
-            model="text-embedding-3-small"
+            model="text-embedding-3-small",
+            max_retries=5,  # Increased retries for rate limits
+            request_timeout=60  # Longer timeout for retries
         )
         self.resort_data = self._load_resort_data()
         self.vector_store = self._build_or_load_vector_store(force_rebuild)
         logger.info(f"✅ Knowledge base initialized with {len(self.resort_data)} venues")
     
     def _load_resort_data(self) -> List[Dict]:
-        """Load resort data from JSON"""
+        """Load resort data from JSON with validation"""
         resort_file = DATA_DIR / "resort_data.json"
         
         if not resort_file.exists():
@@ -55,8 +57,23 @@ class ResortKnowledgeBase:
                 "Run data_generator.py first."
             )
         
-        with open(resort_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(resort_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+            if not isinstance(data, list) or len(data) == 0:
+                raise ValueError(f"Invalid resort data format in {resort_file}")
+                
+            logger.info(f"📊 Loaded {len(data)} venues from resort data")
+            return data
+            
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"Failed to parse resort data JSON: {e}. "
+                "The file may be corrupted. Try regenerating with data_generator.py"
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to load resort data: {e}")
     
     def _create_documents(self) -> List[Document]:
         """Convert resort data into LangChain Documents with rich metadata"""
@@ -95,13 +112,31 @@ class ResortKnowledgeBase:
         return documents
     
     def _build_or_load_vector_store(self, force_rebuild: bool) -> FAISS:
-        """Build vector store or load from cache"""
+        """Build vector store or load from cache using FAISS native methods"""
         
-        # Check if cached version exists
-        if VECTOR_STORE_PATH.exists() and not force_rebuild:
-            logger.info("📦 Loading cached vector store...")
-            with open(VECTOR_STORE_PATH, 'rb') as f:
-                return pickle.load(f)
+        # Check if cached version exists (FAISS native format)
+        if VECTOR_STORE_DIR.exists() and not force_rebuild:
+            try:
+                logger.info("📦 Loading cached vector store...")
+                # Check if index file exists before attempting to load
+                index_file = VECTOR_STORE_DIR / "index.faiss"
+                if not index_file.exists():
+                    logger.warning("⚠️  FAISS index file not found, rebuilding...")
+                else:
+                    # Load using FAISS native method (no pickle, no threading issues)
+                    vector_store = FAISS.load_local(
+                        str(VECTOR_STORE_DIR),
+                        self.embeddings,
+                        allow_dangerous_deserialization=True  # Safe for our controlled data
+                    )
+                    logger.info("✅ Vector store loaded from cache")
+                    return vector_store
+            except EOFError as e:
+                logger.warning(f"⚠️  Corrupted cache file (EOFError): {e}")
+                logger.info("🔨 Rebuilding vector store...")
+            except Exception as e:
+                logger.warning(f"⚠️  Failed to load cached vector store: {e}")
+                logger.info("🔨 Rebuilding vector store...")
         
         logger.info("🔨 Building new vector store...")
         
@@ -116,14 +151,27 @@ class ResortKnowledgeBase:
         )
         split_docs = text_splitter.split_documents(documents)
         
-        # Create FAISS vector store
-        vector_store = FAISS.from_documents(split_docs, self.embeddings)
+        # Create FAISS vector store with retry logic for rate limits
+        max_retries = 3
+        retry_delay = 2  # seconds
         
-        # Cache the vector store
-        with open(VECTOR_STORE_PATH, 'wb') as f:
-            pickle.dump(vector_store, f)
+        for attempt in range(max_retries):
+            try:
+                vector_store = FAISS.from_documents(split_docs, self.embeddings)
+                break
+            except Exception as e:
+                if '429' in str(e) and attempt < max_retries - 1:
+                    wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                    logger.warning(f"⚠️  Rate limit hit, retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                else:
+                    raise
         
-        logger.info(f"💾 Vector store cached to {VECTOR_STORE_PATH}")
+        # Cache the vector store using FAISS native save (not pickle)
+        VECTOR_STORE_DIR.mkdir(parents=True, exist_ok=True)
+        vector_store.save_local(str(VECTOR_STORE_DIR))
+        
+        logger.info(f"💾 Vector store cached to {VECTOR_STORE_DIR}")
         
         return vector_store
     

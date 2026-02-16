@@ -8,6 +8,8 @@ import pandas as pd
 import os
 import time
 import logging
+import json
+import csv
 from pathlib import Path
 from datetime import datetime
 from typing import Dict
@@ -22,6 +24,57 @@ logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
+
+
+# ============================================================================
+# Auto-generate data if missing (for Streamlit Cloud deployments)
+# ============================================================================
+def ensure_data_files_exist():
+    """Generate data files if they don't exist (for Streamlit Cloud)"""
+    data_dir = Path(__file__).parent.parent / "data"
+    resort_data_file = data_dir / "resort_data.json"
+    guests_file = data_dir / "guests.csv"
+    
+    # Clean up old incompatible cache files
+    old_pickle_file = data_dir / "faiss_index.pkl"
+    if old_pickle_file.exists():
+        logger.info("🧹 Removing old incompatible cache file...")
+        old_pickle_file.unlink()
+    
+    if not resort_data_file.exists() or not guests_file.exists():
+        logger.info("📊 Data files not found, generating synthetic data...")
+        try:
+            # Import and run data generator
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent))
+            from data_generator import generate_resort_data, generate_guest_profiles
+            
+            # Ensure data directory exists
+            data_dir.mkdir(exist_ok=True)
+            
+            # Generate resort data
+            if not resort_data_file.exists():
+                resort_data = generate_resort_data()
+                with open(resort_data_file, 'w', encoding='utf-8') as f:
+                    json.dump(resort_data, f, indent=2, ensure_ascii=False)
+                logger.info(f"✅ Generated {len(resort_data)} resort venues")
+            
+            # Generate guest profiles
+            if not guests_file.exists():
+                guests = generate_guest_profiles()
+                with open(guests_file, 'w', encoding='utf-8', newline='') as f:
+                    if guests:
+                        writer = csv.DictWriter(f, fieldnames=guests[0].keys())
+                        writer.writeheader()
+                        writer.writerows(guests)
+                logger.info(f"✅ Generated {len(guests)} guest profiles")
+                
+        except Exception as e:
+            logger.error(f"❌ Failed to generate data: {e}")
+            raise
+
+# Ensure data exists before app starts
+ensure_data_files_exist()
 
 
 # ============================================================================
@@ -224,7 +277,13 @@ GUESTS_FILE = DATA_DIR / "guests.csv"
 
 @st.cache_resource
 def initialize_system():
-    """Initialize the knowledge base and agent (cached)"""
+    """
+    Initialize the knowledge base and agent (cached globally).
+    
+    st.cache_resource doesn't pickle return values - it returns the same
+    instance, making it perfect for non-serializable objects like FAISS with
+    OpenAI embeddings. The cache is shared across all users/sessions.
+    """
     api_key = os.getenv('OPENAI_API_KEY')
     
     if not api_key:
@@ -247,6 +306,25 @@ def initialize_system():
         
         return kb, agent
     
+    except FileNotFoundError as e:
+        st.error("❌ **Data Files Not Found**")
+        st.error(str(e))
+        st.info("""💡 **How to fix:**
+1. Run: `python src/data_generator.py`
+2. This will generate `resort_data.json` and `guests.csv`
+3. Restart the application
+        """)
+        st.stop()
+    
+    except ValueError as e:
+        st.error("❌ **Invalid Data Format**")
+        st.error(str(e))
+        st.info("""💡 **How to fix:**
+1. Run: `python src/data_generator.py` to regenerate data files
+2. Restart the application
+        """)
+        st.stop()
+    
     except Exception as e:
         error_msg = str(e).lower()
         
@@ -256,11 +334,21 @@ def initialize_system():
             st.error("Your OpenAI API key is invalid or has expired. Please check your configuration.")
             st.info("""💡 **How to fix:**
 1. Get a valid API key from https://platform.openai.com/api-keys
-2. Update your `.env` file with: `OPENAI_API_KEY=sk-your-key-here`
+2. In Streamlit Cloud: Add to Secrets in app settings
+3. Locally: Update `.env` file with `OPENAI_API_KEY=sk-your-key-here`
+4. Restart the application
+            """)
+        # Check for EOFError or "Ran out of input"
+        elif 'eof' in error_msg or 'ran out of input' in error_msg:
+            st.error("❌ **Corrupted Data Files**")
+            st.error("The data files appear to be incomplete or corrupted.")
+            st.info("""💡 **How to fix:**
+1. Clear the cache: Delete `data/faiss_index/` folder if it exists
+2. Run: `python src/data_generator.py` to regenerate data files
 3. Restart the application
             """)
         else:
-            st.error(f"❌ Error initializing system: {str(e)}")
+            st.error(f"❌ **Error initializing system:** {str(e)}")
             st.info("💡 Make sure you've run `python src/data_generator.py` first to generate the data files.")
         
         st.stop()
