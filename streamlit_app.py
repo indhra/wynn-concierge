@@ -11,6 +11,8 @@ src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
 # Import and run the main app
-from app import *
+from app import main
 
-# The app will run automatically when Streamlit loads this file
+# Run the main application
+if __name__ == "__main__":
+    main()
