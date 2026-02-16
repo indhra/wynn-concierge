@@ -103,22 +103,22 @@ Create a seamless evening itinerary (6:00 PM - 2:00 AM) for the guest based on t
 
 OUTPUT FORMAT (MANDATORY):
 You MUST respond with valid JSON in this exact structure:
-{
-  "itinerary": {
+{{
+  "itinerary": {{
     "events": [
-      {
+      {{
         "time": "19:00",
         "venue_name": "Verde Garden",
         "venue_type": "Fine Dining",
         "duration_minutes": 90,
         "reason": "Matches your preference for romantic settings with exceptional wine selection",
         "vip_perk": "Reserved the chef's table with complimentary wine pairing"
-      }
+      }}
     ]
-  },
+  }},
   "guest_message": "Good evening, Ms. Chen. I have taken the liberty of crafting a sophisticated evening that honors your preferences...",
   "logistics_notes": "Please allow 15 minutes travel time between venues. Dress code: Smart Elegant."
-}
+}}
 
 RULES OF ENGAGEMENT (The Human Touch):
 
@@ -286,7 +286,7 @@ IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code b
         Returns:
             Formatted itinerary as a string
         """
-        logger.info(f"🎯 Creating itinerary for {guest_profile['name']}: '{user_query}'")
+        logger.info(f"🎯 Creating itinerary for {guest_profile.get('name', 'Guest')}: '{user_query}'")
         
         # Extract intent
         intent = self._extract_intent(user_query)

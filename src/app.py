@@ -487,6 +487,20 @@ def main():
     # Load guests
     guests_df = load_guests()
     
+    # Sidebar - Wynn Branding Header
+    st.sidebar.markdown("""
+    <div style='text-align: center; padding: 1rem 0 1.5rem 0;'>
+        <h1 style='color: #d4af37; margin: 0; font-size: 1.8rem; font-weight: 600;'>
+            WYNN
+        </h1>
+        <p style='color: #888; margin: 0.3rem 0 0 0; font-size: 0.75rem; letter-spacing: 2px;'>
+            AL MARJAN ISLAND
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.sidebar.markdown("---")
+    
     # Sidebar - Guest Selection
     st.sidebar.title("👤 Guest Selection")
     
