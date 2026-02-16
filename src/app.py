@@ -296,10 +296,10 @@ def initialize_system():
         # Initialize knowledge base
         kb = ResortKnowledgeBase(api_key)
         
-        # Initialize agent with model from environment or default to gpt-5-nano-2025-08-07
+        # Initialize agent with model from environment or default to gpt-5-nano
         # To change model: Set OPENAI_MODEL in your .env file
-        # Options: gpt-5-nano-2025-08-07 (cheapest), gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-4
-        model = os.getenv('OPENAI_MODEL', 'gpt-5-nano-2025-08-07')
+        # Options: gpt-5-nano (cheapest), gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-4
+        model = os.getenv('OPENAI_MODEL', 'gpt-5-nano')
         agent = WynnConciergeAgent(kb, api_key, model=model)
         
         # Store model info in session state for display
@@ -691,7 +691,7 @@ Thank you for your understanding!"""
     # ============================================================================
     st.markdown("---")
     with st.expander("🔧 Demo Info (For Development Only)"):
-        current_model = st.session_state.get('current_model', 'gpt-5-nano-2025-08-07')
+        current_model = st.session_state.get('current_model', 'gpt-5-nano')
         st.caption(f"**AI Model:** {current_model}")
         st.caption(f"**Environment:** Demo mode with rate limiting (5 calls/hour)")
         st.caption("_In production, this debug panel would be hidden from guest-facing UI_")

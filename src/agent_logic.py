@@ -155,14 +155,14 @@ Request: <<USER_QUERY>>
 
 IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code blocks or any text outside the JSON structure."""
     
-    def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-nano-2025-08-07"):
+    def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-nano"):
         """
         Initialize the concierge agent.
         
         Args:
             knowledge_base: ResortKnowledgeBase instance
             openai_api_key: OpenAI API key
-            model: OpenAI model to use (default: gpt-5-nano-2025-08-07)
+            model: OpenAI model to use (default: gpt-5-nano)
         """
         self.kb = knowledge_base
         self.llm = ChatOpenAI(
@@ -445,7 +445,7 @@ def demo():
     
     # Initialize components
     kb = ResortKnowledgeBase(api_key)
-    agent = WynnConciergeAgent(kb, api_key, model="gpt-5-nano-2025-08-07")
+    agent = WynnConciergeAgent(kb, api_key, model="gpt-5-nano")
     
     # Test guest
     guest = {

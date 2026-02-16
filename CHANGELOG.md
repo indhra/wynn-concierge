@@ -9,7 +9,7 @@ All notable enhancements to this project are documented here.
 ### 💰 Cost Control Features
 
 - **Default Model Update**
-  - Changed default from `gpt-4o-mini` to `gpt-5-nano-2025-08-07` for optimal cost/performance
+  - Changed default from `gpt-4o-mini` to `gpt-5-nano` for optimal cost/performance
   - Model configurable via `OPENAI_MODEL` environment variable
   - Falls back to cost-effective default if not specified
 

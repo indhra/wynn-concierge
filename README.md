@@ -57,7 +57,7 @@ This AI agent acts as a 24/7 Digital Butler, creating personalized evening itine
 ## 🏗️ Architecture
 
 - **Orchestration**: LangChain
-- **AI Engine**: OpenAI (gpt-5-nano-2025-08-07 default, configurable)
+- **AI Engine**: OpenAI (gpt-5-nano default, configurable)
 - **Knowledge Retrieval**: FAISS Vector Store + RAG
 - **Interface**: Streamlit Dashboard
 - **Data**: Synthetic luxury resort venues + guest profiles

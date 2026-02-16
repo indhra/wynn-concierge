@@ -55,7 +55,7 @@ In the Streamlit Cloud dashboard:
 ```toml
 # .streamlit/secrets.toml format
 OPENAI_API_KEY = "sk-your-api-key-here"
-OPENAI_MODEL = "gpt-5-nano-2025-08-07"
+OPENAI_MODEL = "gpt-5-nano"
 OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
 ```
 
@@ -81,7 +81,7 @@ def __init__(self, openai_api_key: str = None, force_rebuild: bool = False):
 
 ```python
 # Similar change in __init__
-def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str = None, model: str = "gpt-5-nano-2025-08-07"):
+def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str = None, model: str = "gpt-5-nano"):
     if openai_api_key is None:
         try:
             openai_api_key = st.secrets["OPENAI_API_KEY"]
