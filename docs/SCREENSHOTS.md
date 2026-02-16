@@ -208,13 +208,13 @@ To make this project hiring-manager ready, capture these screenshots:
 ## 📸 Screenshots
 
 ### Guest Selection & VIP Recognition
-![Guest Selection](docs/assets/screenshot_1_guest_selection.png)
+![Guest Selection](assets/screenshot_1_guest_selection.png)
 
 ### The "Intelligence Test" - Safety-Aware Redirect
-![Vegetarian Redirect](docs/assets/screenshot_5_itinerary.png)
+![Vegetarian Redirect](assets/screenshot_5_itinerary.png)
 
 ### Full Demo Flow
-![Demo GIF](docs/assets/demo_full_flow.gif)
+![Demo GIF](assets/demo_full_flow.gif)
 ```
 
 ### In HIRING_MANAGER.md:
@@ -225,7 +225,7 @@ To make this project hiring-manager ready, capture these screenshots:
 [![Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://youtu.be/YOUR_VIDEO_ID)
 
 **Quick look:**
-![Safety Check](docs/assets/screenshot_5_itinerary.png)
+![Safety Check](assets/screenshot_5_itinerary.png)
 ```
 
 ### In LinkedIn Post:

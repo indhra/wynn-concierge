@@ -10,7 +10,7 @@ A hyper-personalized luxury concierge system powered by GPT-4 and LangChain RAG,
 
 ## 🚀 **For Hiring Managers**
 
-**👉 [5-Minute Evaluation Guide](HIRING_MANAGER.md)** - Quick demo scenarios to test the AI
+**👉 [5-Minute Evaluation Guide](docs/HIRING_MANAGER.md)** - Quick demo scenarios to test the AI
 
 **📺 LIVE DEMO:** **[https://wynn-concierge.streamlit.app/](https://wynn-concierge.streamlit.app/)** ✨
 
@@ -100,7 +100,7 @@ wynn-concierge/
 ## 🧪 Testing the System
 � Screenshots
 
-> **Note:** After deploying the app, capture screenshots following [SCREENSHOTS.md](SCREENSHOTS.md)
+> **Note:** After deploying the app, capture screenshots following [SCREENSHOTS.md](docs/SCREENSHOTS.md)
 
 ### Guest Selection with VIP Card
 *Black Tier card with gold gradient, dietary restrictions visible*
@@ -110,11 +110,11 @@ wynn-concierge/
 
 ## 📚 Documentation
 
-- **[HIRING_MANAGER.md](HIRING_MANAGER.md)** - 5-minute evaluation guide for recruiters
-- **[QUICKSTART.md](QUICKSTART.md)** - Quick start guide with troubleshooting
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System design and technical deep-dive
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deploy to Streamlit Cloud (free)
-- **[SCREENSHOTS.md](SCREENSHOTS.md)** - Visual assets creation guide
+- **[HIRING_MANAGER.md](docs/HIRING_MANAGER.md)** - 5-minute evaluation guide for recruiters
+- **[QUICKSTART.md](docs/QUICKSTART.md)** - Quick start guide with troubleshooting
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System design and technical deep-dive
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Deploy to Streamlit Cloud (free)
+- **[SCREENSHOTS.md](docs/SCREENSHOTS.md)** - Visual assets creation guide
 
 ## 🎓 Skills Demonstrated
 
@@ -138,7 +138,7 @@ If this project helped you or you find it impressive, please give it a star! It 
 
 ## 🏗️ Architecture & Design
 
-**[View Complete Architecture](ARCHITECTURE.md)** - System design, data flow, and technical decisions
+**[View Complete Architecture](docs/ARCHITECTURE.md)** - System design, data flow, and technical decisions
 
 **Key Highlights:**
 - **RAG Pattern**: FAISS vector search with semantic matching
