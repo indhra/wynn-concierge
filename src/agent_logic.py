@@ -166,7 +166,7 @@ IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code b
             openai_api_key=openai_api_key,
             model=model,
             temperature=0.7,  # Some creativity for natural language
-            max_tokens=1500
+            max_completion_tokens=1500
         )
         logger.info(f"✅ Concierge agent initialized with {model}")
     
