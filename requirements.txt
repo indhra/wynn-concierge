@@ -1,6 +1,7 @@
 # Core AI & LangChain (Updated for Python 3.13 compatibility)
 langchain>=0.1.0,<0.3.0
 langchain-openai>=0.1.0,<0.3.0
+langchain-community>=0.0.1
 openai>=1.10.0,<2.0.0
 
 # Vector Store (Python 3.13 compatible)
