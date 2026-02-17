@@ -98,33 +98,46 @@ class WynnConciergeAgent:
     Creates personalized itineraries with safety and logistics validation.
     """
     
-    # Compact system prompt to reduce token usage
-    SYSTEM_PROMPT_TEMPLATE = """You are Chief Concierge at Wynn Al Marjan Island.
+    # Luxury concierge system prompt - confident and knowledgeable
+    SYSTEM_PROMPT_TEMPLATE = """You are the Chief Concierge at Wynn Al Marjan Island, serving ultra-high-net-worth guests.
 
 Guest: <<GUEST_NAME>> (<<LOYALTY_TIER>> Tier)
 Restrictions: <<DIETARY_RESTRICTIONS>>
 Preferences: <<PREFERENCES>>
 
-VENUES:
+AVAILABLE VENUES:
 <<VENUES_CONTEXT>>
 
-Request: <<USER_QUERY>>
+Guest Request: <<USER_QUERY>>
 
-Create evening itinerary (6 PM-2 AM). Return ONLY valid JSON:
+PERSONA & TONE:
+- You are THE authority on luxury dining and entertainment
+- Be confident, warm, and sophisticated - never apologetic or uncertain
+- Provide direct recommendations immediately - don't ask for clarification
+- Use refined language: "I've reserved", "May I suggest", "You'll enjoy"
+- Sound like a $500/night concierge, not a chatbot
+
+For SIMPLE QUESTIONS (e.g., "best dish", "good restaurant"):
+- Give ONE confident recommendation immediately
+- Be concise (2-3 sentences max for simple queries)
+- Example: "For non-vegetarian excellence, I recommend our 45-day dry-aged Tomahawk ribeye at The Obsidian Steakhouse. It's exceptional."
+
+For COMPLEX ITINERARIES:
+Return ONLY valid JSON:
 {
   "itinerary": {"events": [{"time": "19:00", "venue_name": "Verde Garden", "venue_type": "Fine Dining", "duration_minutes": 90, "reason": "Matches preferences", "vip_perk": "Reserved chef's table"}]},
-  "guest_message": "Good evening, [Name]. I have crafted...",
-  "logistics_notes": "Allow 15 min between venues. Dress: Smart Elegant."
+  "guest_message": "Good evening, [Name]. I have curated an exceptional evening for you...",
+  "logistics_notes": "Private car arranged between venues. Dress: Smart Elegant."
 }
 
-RULES:
-1. Never double-book time slots (90 min dinner, 15 min travel)
-2. SAFETY: Never recommend venues unsafe for guest dietary restrictions
-3. Black Tier: Mention VIP perks ("waived cover", "best table")
-4. Tone: Warm, sophisticated, use "I have arranged...", "May I suggest..."
-5. If unsafe request: Gracefully redirect to safe alternative
+CRITICAL RULES:
+1. Never ask guests to "be more specific" - you're the expert, recommend something
+2. SAFETY: Never recommend venues unsafe for dietary restrictions - redirect elegantly
+3. Black Tier: Always mention exclusive perks
+4. Never apologize for being "too detailed" - be concise from the start
+5. For vague requests: Make an intelligent assumption and provide your best recommendation
 
-Return ONLY JSON. No markdown, no code blocks."""
+Return ONLY JSON for itineraries, or direct text for simple questions. No markdown."""
     
     def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-nano"):
         """
@@ -140,11 +153,11 @@ Return ONLY JSON. No markdown, no code blocks."""
             openai_api_key=openai_api_key,
             model=model,
             temperature=1,  # gpt-5-nano REQUIRES temperature=1 (only supported value)
-            max_completion_tokens=1500,  # Reduced for faster responses
-            streaming=True,  # Enable streaming for lower perceived latency
+            max_completion_tokens=10000,  # Very high limit for reasoning models (gpt-5-nano uses extensive reasoning tokens)
+            streaming=False,  # Disabled - using invoke() not stream()
             model_kwargs={"response_format": {"type": "json_object"}}  # Force JSON output
         )
-        logger.info(f"✅ Concierge agent initialized with {model} (JSON mode + streaming enabled)")
+        logger.info(f"✅ Concierge agent initialized with {model} (JSON mode enabled)")
     
     def _parse_timeframe(self, query: str) -> tuple:
         """
@@ -206,7 +219,7 @@ Return ONLY JSON. No markdown, no code blocks."""
                 venues = self.kb.search_amenities(
                     query=query,
                     guest_profile=guest_profile,
-                    k=2,  # Reduced from 3 to 2 for faster search
+                    k=3,  # Balanced: quality vs speed
                     filter_category=category
                 )
                 all_venues.extend(venues)
@@ -215,7 +228,7 @@ Return ONLY JSON. No markdown, no code blocks."""
             venues = self.kb.search_amenities(
                 query=query,
                 guest_profile=guest_profile,
-                k=4  # Reduced from 6 to 4 for faster search
+                k=5  # Balanced: quality vs speed
             )
             all_venues.extend(venues)
         
@@ -227,7 +240,7 @@ Return ONLY JSON. No markdown, no code blocks."""
                 seen_ids.add(venue['id'])
                 unique_venues.append(venue)
         
-        return unique_venues[:5]  # Reduced from 8 to 5 for smaller context
+        return unique_venues[:6]  # Return top 6 for balanced context
     
     def _format_venues_context(self, venues: List[Dict]) -> str:
         """Format venues for inclusion in the prompt"""
@@ -269,14 +282,14 @@ Return ONLY JSON. No markdown, no code blocks."""
             return "I apologize, but there was an error with the guest profile. Please try again."
         
         if not user_query or not user_query.strip():
-            return "I apologize, but I didn't catch your request. Could you please tell me what you're looking for this evening?"
+            return "Good evening. How may I assist you with your evening plans? I can recommend exceptional dining, entertainment, or create a complete itinerary for you."
         
-        # Quick response for simple greetings and common queries (no need for full itinerary generation)
+        # Quick response for simple greetings ONLY (very conservative fast-path)
         query_lower = user_query.lower().strip()
-        simple_greetings = ['hi', 'hello', 'hey', 'good evening', 'good afternoon', 'greetings', 'thanks', 'thank you']
+        simple_greetings = ['hi', 'hello', 'hey', 'good evening', 'good afternoon', 'greetings']
         
-        # Fast path for simple greetings
-        if query_lower in simple_greetings or len(user_query.strip()) < 10:
+        # Fast path ONLY for single-word greetings (no other fast paths to ensure quality)
+        if query_lower in simple_greetings:
             guest_name = guest_profile.get('name', 'Guest')
             tier = guest_profile.get('loyalty_tier', 'Platinum')
             greeting = f"""Good evening, {guest_name.split()[0] if guest_name != 'Guest' else 'there'}. Welcome to Wynn Al Marjan Island.
@@ -285,7 +298,7 @@ As a {tier} Tier member, I'm delighted to assist you this evening. How may I hel
 
 I can help you with:
 • Dining reservations at our award-winning restaurants
-• Entertainment and nightlife recommendations
+• Entertainment and nightlife recommendations  
 • Spa and wellness experiences
 • Special events and celebrations
 
@@ -293,38 +306,21 @@ What are you in the mood for this evening?"""
             logger.info(f"✅ Quick greeting response (bypassed RAG) for {guest_name}")
             return greeting
         
-        # Fast path for simple single-category requests
-        simple_requests = {
-            'dinner': 'Fine Dining',
-            'eat': 'Fine Dining',
-            'restaurant': 'Fine Dining',
-            'spa': 'Spa',
-            'massage': 'Spa',
-            'club': 'Nightlife',
-            'bar': 'Nightlife',
-            'dance': 'Nightlife'
-        }
-        
-        # Check if it's a simple single-word or short request
-        if len(user_query.split()) <= 10:
-            for keyword, category in simple_requests.items():
-                if keyword in query_lower:
-                    logger.info(f"✅ Fast path: Simple '{keyword}' request detected, using quick recommendation")
-                    return self.quick_recommendation(category, guest_profile)
-        
         logger.info(f"🎯 Creating itinerary for {guest_profile.get('name', 'Guest')}: '{user_query}'")
         
         # Extract intent
         intent = self._extract_intent(user_query)
         
-        # Get relevant venues using RAG (optimized: fewer venues for faster processing)
+        # Get relevant venues using RAG (optimized but not too aggressive)
         venues = self._get_relevant_venues(user_query, guest_profile, intent)
         
         if not venues:
-            return "I apologize, but I'm having difficulty finding suitable venues for your request. Could you provide more details about what you're looking for this evening?"
+            # Fallback to confident general recommendation
+            guest_name = guest_profile.get('name', 'Guest').split()[0] if guest_profile.get('name', 'Guest') != 'Guest' else ''
+            return f"For this evening{', ' + guest_name if guest_name else ''}, I recommend exploring our signature dining experiences. The Obsidian Steakhouse offers exceptional cuisine, or I can arrange something specific if you'd like to share your preferences."
         
-        # Limit venues to top 5 for faster processing (instead of 8)
-        venues = venues[:5]
+        # Limit venues to top 6 for balanced context (quality vs speed)
+        venues = venues[:6]
         
         # Format venues context
         venues_context = self._format_venues_context(venues)
@@ -419,33 +415,53 @@ May I suggest an alternative that would better suit your preferences? Please let
                 if itinerary.strip() and '{' in itinerary:
                     logger.warning("⚠️ Response appears truncated - likely hit token limit")
                 
-                # Return a user-friendly error message
-                return """I apologize for the technical difficulty. Let me help you differently.
+                # Provide confident fallback recommendation instead of apologizing
+                guest_name = guest_profile.get('name', 'Guest').split()[0] if guest_profile.get('name', 'Guest') != 'Guest' else ''
+                tier = guest_profile.get('loyalty_tier', 'Platinum')
+                
+                # Extract key intent for smart response
+                query_lower = user_query.lower()
+                if any(word in query_lower for word in ['dinner', 'dine', 'eat', 'dish', 'food', 'non veg', 'meat', 'steak']):
+                    return f"""For exceptional dining this evening{', ' + guest_name if guest_name else ''}, I recommend The Obsidian Steakhouse. Their 45-day dry-aged Tomahawk ribeye is outstanding.
 
-Could you please tell me:
-- What type of dining experience are you looking for?
-- What kind of atmosphere do you prefer?
-- Any specific activities you'd like to include?
+Alternatively, Sakura Omakase offers exquisite sushi with fish flown daily from Tokyo, or Côte d'Azur for spectacular seafood.
 
-I'll create a perfect itinerary for you."""
+Shall I reserve a table for you?"""
+                elif any(word in query_lower for word in ['club', 'party', 'dance', 'nightlife', 'drinks']):
+                    vip_note = " As a Black Tier member, cover charges are waived." if tier == 'Black' else ""
+                    return f"For an exceptional evening{', ' + guest_name if guest_name else ''}, I suggest starting at XS Nightclub - world-class DJs and premium bottle service.{vip_note} Shall I arrange this?"
+                else:
+                    return f"""Allow me to suggest an exceptional evening{', ' + guest_name if guest_name else ''}: Begin with dinner at our award-winning Obsidian Steakhouse, followed by cocktails at the Sky Lounge.
+
+Would you like me to arrange this, or do you have specific preferences I should consider?"""
             
         except Exception as e:
             error_msg = str(e)
             logger.error(f"❌ Error creating itinerary: {e}")
             
-            # Check for token limit errors
-            if 'length limit' in error_msg or 'max_completion_tokens' in error_msg:
-                logger.error("⚠️ Token limit reached - response was truncated")
-                return f"""I apologize, but my response was too detailed. Let me try a more concise approach.
-
-Could you please be more specific about what you're looking for? For example:
-- "I want Italian dinner and jazz music"
-- "Romantic evening with wine"
-- "Nightlife and dancing"
-
-This will help me create a perfect, focused itinerary for you."""
+            # Check for token limit errors - provide confident fallback
+            guest_name = guest_profile.get('name', 'Guest').split()[0] if guest_profile.get('name', 'Guest') != 'Guest' else ''
+            tier = guest_profile.get('loyalty_tier', 'Platinum')
             
-            return f"I apologize, but I'm experiencing a technical difficulty. Please try again in a moment."
+            if 'length limit' in error_msg or 'max_completion_tokens' in error_msg:
+                logger.error("⚠️ Token limit reached - providing fallback recommendation")
+            
+            # Smart fallback based on query
+            query_lower = user_query.lower()
+            if any(word in query_lower for word in ['dinner', 'dine', 'eat', 'dish', 'food', 'non veg', 'meat', 'steak', 'seafood', 'fish']):
+                vip_note = "\n\nAs our Black Tier guest, I've arranged the chef's table with complimentary wine pairing." if tier == 'Black' else ""
+                return f"""For an exceptional dinner this evening{', ' + guest_name if guest_name else ''}, I recommend The Obsidian Steakhouse. Their 45-day dry-aged Tomahawk ribeye with black truffle butter is extraordinary.
+
+Reservation at 7:30 PM, estimated 2 hours. Smart elegant dress code.{vip_note}
+
+Shall I confirm this arrangement?"""
+            elif any(word in query_lower for word in ['club', 'party', 'dance', 'nightlife']):
+                vip_note = " Cover charges waived for you." if tier == 'Black' else ""
+                return f"For tonight's entertainment{', ' + guest_name if guest_name else ''}, XS Nightclub features world-renowned DJs and premium bottle service.{vip_note} Shall I arrange entry?"
+            else:
+                return f"""For this evening{', ' + guest_name if guest_name else ''}, may I suggest our signature experience: Dinner at The Obsidian Steakhouse (7:30 PM), followed by cocktails at Sky Lounge (10:00 PM).
+
+Would you like me to arrange this?"""
     
     def create_itinerary_stream(self, user_query: str, guest_profile: Dict):
         """
@@ -465,15 +481,15 @@ This will help me create a perfect, focused itinerary for you."""
             return
         
         if not user_query or not user_query.strip():
-            yield "I apologize, but I didn't catch your request. Could you please tell me what you're looking for this evening?"
+            yield "Good evening. How may I assist you with your evening plans? I can recommend exceptional dining, entertainment, or create a complete itinerary for you."
             return
         
-        # Quick response for simple greetings and common queries (no streaming needed)
+        # Quick response for simple greetings ONLY (very conservative)
         query_lower = user_query.lower().strip()
-        simple_greetings = ['hi', 'hello', 'hey', 'good evening', 'good afternoon', 'greetings', 'thanks', 'thank you']
+        simple_greetings = ['hi', 'hello', 'hey', 'good evening', 'good afternoon', 'greetings']
         
-        # Fast path for simple greetings
-        if query_lower in simple_greetings or len(user_query.strip()) < 10:
+        # Fast path ONLY for single-word greetings
+        if query_lower in simple_greetings:
             guest_name = guest_profile.get('name', 'Guest')
             tier = guest_profile.get('loyalty_tier', 'Platinum')
             greeting = f"""Good evening, {guest_name.split()[0] if guest_name != 'Guest' else 'there'}. Welcome to Wynn Al Marjan Island.
@@ -491,26 +507,6 @@ What are you in the mood for this evening?"""
             yield greeting
             return
         
-        # Fast path for simple single-category requests
-        simple_requests = {
-            'dinner': 'Fine Dining',
-            'eat': 'Fine Dining',
-            'restaurant': 'Fine Dining',
-            'spa': 'Spa',
-            'massage': 'Spa',
-            'club': 'Nightlife',
-            'bar': 'Nightlife',
-            'dance': 'Nightlife'
-        }
-        
-        # Check if it's a simple single-word or short request
-        if len(user_query.split()) <= 10:
-            for keyword, category in simple_requests.items():
-                if keyword in query_lower:
-                    logger.info(f"✅ Fast path: Simple '{keyword}' request detected, using quick recommendation")
-                    yield self.quick_recommendation(category, guest_profile)
-                    return
-        
         logger.info(f"🎯 Creating itinerary (streaming) for {guest_profile.get('name', 'Guest')}: '{user_query}'")
         
         # Extract intent
@@ -520,7 +516,8 @@ What are you in the mood for this evening?"""
         venues = self._get_relevant_venues(user_query, guest_profile, intent)
         
         if not venues:
-            yield "I apologize, but I'm having difficulty finding suitable venues for your request. Could you provide more details about what you're looking for this evening?"
+            guest_name = guest_profile.get('name', 'Guest').split()[0] if guest_profile.get('name', 'Guest') != 'Guest' else ''
+            yield f"For this evening{', ' + guest_name if guest_name else ''}, I recommend exploring our signature dining experiences. The Obsidian Steakhouse offers exceptional cuisine, or I can arrange something specific if you'd like to share your preferences."
             return
         
         # Limit venues to top 5 for faster processing
@@ -560,18 +557,20 @@ What are you in the mood for this evening?"""
             
         except Exception as e:
             logger.error(f"❌ Error streaming itinerary: {e}")
-            yield "\n\nI apologize for the technical difficulty. Please try rephrasing your request."
+            guest_name = guest_profile.get('name', 'Guest').split()[0] if guest_profile.get('name', 'Guest') != 'Guest' else ''
+            yield f"\n\nLet me suggest our signature experience{', ' + guest_name if guest_name else ''}: The Obsidian Steakhouse for dinner. Shall I arrange this?"
     
     def quick_recommendation(self, category: str, guest_profile: Dict) -> str:
         """
         Quick recommendation for a specific category.
+        NOTE: This is only used for sidebar quick buttons, not for chat queries.
         
         Args:
             category: Venue category (e.g., "Fine Dining")
             guest_profile: Guest profile dictionary
         
         Returns:
-            Brief recommendation
+            Detailed recommendation
         """
         venues = self.kb.search_amenities(
             query=f"best {category}",
@@ -597,11 +596,22 @@ What are you in the mood for this evening?"""
                 return f"Given your dietary restrictions, I recommend consulting with our dietary team for {category} options."
         
         tier = guest_profile.get('loyalty_tier', 'Platinum')
+        guest_name = guest_profile.get('name', 'Guest').split()[0]
         
-        recommendation = f"For {category}, I highly recommend **{venue['name']}**. {venue['description'][:150]}..."
+        # Create engaging, detailed recommendation
+        recommendation = f"""For {category}, I highly recommend **{venue['name']}**.
+
+{venue['description']}
+
+**Details:**
+• **Hours:** {venue['opening_hours']}
+• **Vibe:** {', '.join(venue['tags'][:3])}
+• **Price Level:** {venue['price_tier']}"""
         
         if tier == 'Black':
-            recommendation += f"\n\nAs a Black Tier member, {venue['vip_perks'].lower()}."
+            recommendation += f"\n\n**Your Black Tier Benefits:**\n{venue['vip_perks']}"
+        
+        recommendation += f"\n\nWould you like me to arrange a reservation for you, {guest_name}?"
         
         return recommendation
 

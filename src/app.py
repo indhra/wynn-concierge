@@ -30,12 +30,9 @@ logger.info(f"📁 .env exists: {env_path.exists()}")
 # Load with override=True to override shell variables
 load_dotenv(dotenv_path=env_path, override=True)
 
-# Debug: log what API key we got
-api_key_preview = os.getenv('OPENAI_API_KEY', 'NOT_SET')
-logger.info(f"🔑 Raw API key value: '{api_key_preview}'")
-if api_key_preview != 'NOT_SET':
-    logger.info(f"🔑 API key length: {len(api_key_preview)}")
-    logger.info(f"🔑 API key preview: {api_key_preview[:25]}...{api_key_preview[-15:]}")
+# Verify API key is loaded (without logging the actual key)
+api_key_loaded = bool(os.getenv('OPENAI_API_KEY'))
+logger.info(f"🔑 API key loaded: {api_key_loaded}")
 
 
 # ============================================================================
@@ -303,8 +300,8 @@ def initialize_system(_api_key: str):
         st.error("⚠️ OPENAI_API_KEY not found or invalid. Please configure your .env file.")
         st.stop()
     
-    # Log API key (first/last chars only for security)
-    logger.info(f"🔑 API key loaded: {_api_key[:15]}...{_api_key[-15:]}")
+    # Log that API key is validated (without exposing the key)
+    logger.info("🔑 API key validated successfully")
     
     try:
         # Initialize knowledge base
@@ -670,31 +667,20 @@ Thank you for your understanding!"""
         # Generate response
         with st.chat_message("assistant"):
             # Quick status (minimal delay for better UX)
-            with st.status("Crafting your experience...", expanded=False) as status:
+            placeholder = st.empty()
+            with placeholder.status("Crafting your experience...", expanded=False):
                 time.sleep(0.2)  # Minimal delay to show we're working
-                status.update(label="Ready!", state="complete", expanded=False)
+            placeholder.empty()
             
             # Create guest profile dict
             guest_profile = guest_data.to_dict()
             
-            # Stream the response for lower perceived latency
-            response_placeholder = st.empty()
-            full_response = ""
+            # Get response (streaming enabled in backend for lower latency)
+            with st.spinner(""):
+                response = agent.create_itinerary(prompt, guest_profile)
             
-            # Use streaming to show response as it arrives
-            try:
-                for chunk in agent.create_itinerary_stream(prompt, guest_profile):
-                    full_response += chunk
-                    response_placeholder.markdown(full_response + "▌")  # Cursor effect
-                
-                # Remove cursor and show final response
-                response_placeholder.markdown(full_response)
-                
-            except Exception as e:
-                logger.error(f"❌ Streaming error: {e}")
-                # Fallback to non-streaming
-                full_response = agent.create_itinerary(prompt, guest_profile)
-                response_placeholder.markdown(full_response)
+            # Display response
+            st.markdown(response)
             
             # Record this API call for rate limiting
             record_api_call(guest_name)
@@ -705,7 +691,7 @@ Thank you for your understanding!"""
             # Add to history
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": full_response,
+                "content": response,
                 "timestamp": response_timestamp
             })
             

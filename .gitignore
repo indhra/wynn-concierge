@@ -209,3 +209,10 @@ __marimo__/
 
 # Internal development plans
 plan.md
+
+# Security: Prevent accidental commit of files with API keys
+FIX_SUMMARY.md
+test_openai_key.py
+*.key
+*.secret
+*_key.py
