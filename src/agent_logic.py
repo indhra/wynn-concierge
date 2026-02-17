@@ -104,8 +104,10 @@ class WynnConciergeAgent:
 YOUR MISSION:
 Create a seamless evening itinerary (6:00 PM - 2:00 AM) for the guest based on their request.
 
+CRITICAL: You MUST respond with ONLY valid JSON. No markdown, no code blocks, no additional text. Just pure JSON.
+
 OUTPUT FORMAT (MANDATORY):
-You MUST respond with valid JSON in this exact structure:
+Respond with valid JSON in this exact structure:
 {
   "itinerary": {
     "events": [
@@ -153,7 +155,7 @@ AVAILABLE VENUES:
 
 Request: <<USER_QUERY>>
 
-IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code blocks or any text outside the JSON structure."""
+REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra text, no markdown formatting, no code blocks."""
     
     def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-nano"):
         """
@@ -169,9 +171,10 @@ IMPORTANT: Your response must be valid JSON only. Do NOT include markdown code b
             openai_api_key=openai_api_key,
             model=model,
             temperature=1,  # gpt-5-nano REQUIRES temperature=1 (only supported value)
-            max_completion_tokens=1500
+            max_completion_tokens=1500,
+            model_kwargs={"response_format": {"type": "json_object"}}  # Force JSON output
         )
-        logger.info(f"✅ Concierge agent initialized with {model}")
+        logger.info(f"✅ Concierge agent initialized with {model} (JSON mode enabled)")
     
     def _parse_timeframe(self, query: str) -> tuple:
         """
@@ -352,22 +355,37 @@ May I suggest an alternative that would better suit your preferences? Please let
             # Attempt to parse JSON for structured data (system integration ready)
             try:
                 import json
+                # Clean the response text
+                json_text = itinerary.strip()
+                
                 # Try to extract JSON from response (handle potential markdown wrapping)
-                json_text = itinerary
-                if '```json' in itinerary:
-                    json_text = itinerary.split('```json')[1].split('```')[0].strip()
-                elif '```' in itinerary:
-                    json_text = itinerary.split('```')[1].split('```')[0].strip()
+                if '```json' in json_text:
+                    json_text = json_text.split('```json')[1].split('```')[0].strip()
+                elif '```' in json_text:
+                    json_text = json_text.split('```')[1].split('```')[0].strip()
+                
+                # Remove any leading/trailing whitespace or newlines
+                json_text = json_text.strip()
+                
+                # Validate JSON is not empty
+                if not json_text:
+                    raise ValueError("Empty response from LLM")
                 
                 parsed_itinerary = json.loads(json_text)
                 
+                # Validate required fields
+                if 'guest_message' not in parsed_itinerary:
+                    logger.warning("⚠️ JSON missing 'guest_message' field, using fallback")
+                    raise KeyError("Missing guest_message field")
+                
                 # Log structured data for system integration
                 logger.info("✅ Structured itinerary data available for downstream systems")
-                logger.debug(f"Events count: {len(parsed_itinerary.get('itinerary', {}).get('events', []))}")
+                events_count = len(parsed_itinerary.get('itinerary', {}).get('events', []))
+                logger.info(f"📅 Events scheduled: {events_count}")
                 
                 # Return the guest message (human-readable) for UI display
                 # In production: Also store parsed_itinerary['itinerary']['events'] in PMS
-                itinerary_display = parsed_itinerary.get('guest_message', itinerary)
+                itinerary_display = parsed_itinerary.get('guest_message', '')
                 
                 # Append logistics notes if available
                 logistics = parsed_itinerary.get('logistics_notes')
@@ -377,11 +395,20 @@ May I suggest an alternative that would better suit your preferences? Please let
                 logger.info("✅ Itinerary created successfully (with structured data)")
                 return itinerary_display
                 
-            except (json.JSONDecodeError, KeyError) as e:
-                # Fallback: Return raw text if JSON parsing fails
-                logger.warning(f"⚠️ JSON parsing failed, returning raw text: {e}")
-                logger.info("✅ Itinerary created successfully (raw text fallback)")
-                return itinerary
+            except (json.JSONDecodeError, KeyError, ValueError) as e:
+                # Enhanced error logging
+                logger.error(f"❌ JSON parsing failed: {e}")
+                logger.error(f"Raw response (first 500 chars): {itinerary[:500]}")
+                
+                # Return a user-friendly error message
+                return """I apologize for the technical difficulty. Let me help you differently.
+
+Could you please tell me:
+- What type of dining experience are you looking for?
+- What kind of atmosphere do you prefer?
+- Any specific activities you'd like to include?
+
+I'll create a perfect itinerary for you."""
             
         except Exception as e:
             logger.error(f"❌ Error creating itinerary: {e}")
