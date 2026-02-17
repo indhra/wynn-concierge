@@ -358,17 +358,36 @@ AVAILABLE RESTAURANTS & VENUES:
 
 GUEST REQUEST: "{query}"{context_note}
 
-RESPONSE INSTRUCTIONS:
-- Provide a confident, knowledgeable response
-- For SIMPLE questions: 2-4 sentences with clear recommendation
-- For COMPLEX requests: Include details, options, and logistics
-- Always mention relevant VIP perks for Black Tier guests
-- Use guest's name (if known) to personalize
-- Never apologize or say "I'm having difficulty"
-- Make intelligent assumptions for unclear requests
-- Keep response professional, warm, and sophisticated
+LUXURY FORMATTING GUIDELINES:
+Use elegant, magazine-style formatting inspired by Ritz-Carlton and Four Seasons digital experiences:
 
-Respond with natural, conversational text (not JSON)."""
+1. STRUCTURE:
+   - Personal greeting with guest name
+   - Clear sections with visual separators (━━━ or ---)
+   - Bullet points or numbered lists for options
+   - Highlighted VIP perks in a distinct section
+   - Clear call-to-action at the end
+
+2. MARKDOWN FORMATTING:
+   - **Bold** for wine/venue names, key terms
+   - *Italics* for tasting notes, ambiance descriptions
+   - Tasteful emoji use: 🥂 🍷 🍾 ✨ (luxury-appropriate only)
+   - Line breaks for breathing room
+   - Section headers for longer responses
+
+3. TONE & STYLE:
+   - Address guest by first name (warm but professional)
+   - Confident, knowledgeable, never apologetic
+   - Curated recommendations (like a sommelier's selection)
+   - Mention Black Tier privileges elegantly
+   - End with clear next step or question
+
+4. EXAMPLES:
+   For wine: "🍷 **Pinot Noir** (Burgundy) — *elegant, silky texture*"
+   For dining: "**Tartufo Nero** ✨ *Romantic ambiance with truffle-focused menu*"
+   For VIP perks: "**✨ Black Tier Exclusive** • Private wine cellar access • Sommelier-curated tastings"
+
+Keep responses scannable, elegant, and actionable. Avoid dense paragraphs."""
         
         return prompt
     
