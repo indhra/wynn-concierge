@@ -16,7 +16,8 @@ from typing import Dict, Tuple
 from dotenv import load_dotenv
 
 from vector_store import ResortKnowledgeBase
-from agent_logic import WynnConciergeAgent
+from luxury_concierge_v2 import LuxuryConciergeAgentV2, TimeoutError
+from agent_logic import WynnConciergeAgent  # Keep for backward compatibility
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -307,14 +308,15 @@ def initialize_system(_api_key: str):
         # Initialize knowledge base
         kb = ResortKnowledgeBase(_api_key)
         
-        # Initialize agent with model from environment or default to gpt-5-nano
+        # Initialize LUXURY V2 AGENT (Premium experience for all users)
         model = os.getenv('OPENAI_MODEL', 'gpt-5-nano')
-        agent = WynnConciergeAgent(kb, _api_key, model=model)
+        agent = LuxuryConciergeAgentV2(kb, _api_key, model=model, enable_tracing=True)
         
         # Store model info in session state for display
         if 'current_model' not in st.session_state:
             st.session_state.current_model = model
         
+        logger.info(f"✅ System initialized with LuxuryConciergeAgentV2 ({model})")
         return kb, agent
     
     except FileNotFoundError as e:
@@ -553,9 +555,16 @@ def main():
             # Create guest profile dict
             guest_profile = guest_data.to_dict()
             
-            # Get recommendation
+            # Get recommendation using V2 agent
             with st.spinner(f"Finding the perfect {category} venue..."):
-                recommendation = agent.quick_recommendation(category, guest_profile)
+                try:
+                    # Use V2 luxury response for quick recommendations
+                    query = f"What do you recommend for {category}?"
+                    agent.initiate_guest_session(guest_profile)
+                    recommendation, metrics = agent.create_luxury_response(query, guest_profile)
+                except Exception as e:
+                    logger.warning(f"V2 quick recommendation failed: {e}, using fallback")
+                    recommendation = f"I recommend exploring our premium {category} options. What speaks to you?"
             
             # Add to chat
             if 'messages' not in st.session_state:
@@ -649,63 +658,87 @@ Thank you for your understanding!"""
                     "content": error_msg,
                     "timestamp": format_timestamp()
                 })
-            st.stop()
-        
-        # Add user message
-        timestamp = format_timestamp()
-        st.session_state.messages.append({
-            "role": "user",
-            "content": prompt,
-            "timestamp": timestamp
-        })
-        
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(prompt)
-            st.caption(timestamp)
-        
-        # Generate response
-        with st.chat_message("assistant"):
-            # Quick status (minimal delay for better UX)
-            placeholder = st.empty()
-            with placeholder.status("Crafting your experience...", expanded=False):
-                time.sleep(0.2)  # Minimal delay to show we're working
-            placeholder.empty()
-            
-            # Create guest profile dict
-            guest_profile = guest_data.to_dict()
-            
-            # Get response (streaming enabled in backend for lower latency)
-            with st.spinner(""):
-                response = agent.create_itinerary(prompt, guest_profile)
-            
-            # Display response
-            st.markdown(response)
-            
-            # Record this API call for rate limiting
-            record_api_call(guest_name)
-            
-            response_timestamp = format_timestamp()
-            st.caption(response_timestamp)
-            
-            # Add to history
+        else:
+            # Add user message
+            timestamp = format_timestamp()
             st.session_state.messages.append({
-                "role": "assistant",
-                "content": response,
-                "timestamp": response_timestamp
+                "role": "user",
+                "content": prompt,
+                "timestamp": timestamp
             })
             
-            # Show remaining calls
-            remaining_after = remaining - 1
-            if remaining_after <= 2:
-                st.warning(f"⚠️ {remaining_after} API calls remaining this hour")
+            # Display user message
+            with st.chat_message("user"):
+                st.markdown(prompt)
+                st.caption(timestamp)
+            
+            # Generate response
+            with st.chat_message("assistant"):
+                # Create guest profile dict
+                guest_profile = guest_data.to_dict()
+                
+                # LATENCY OPTIMIZATION: Show response immediately with placeholder while generating
+                response_placeholder = st.empty()
+                with response_placeholder.container():
+                    st.markdown("✨ *Crafting an exceptional experience for you...*")
+                    with st.spinner("Processing your request"):
+                        pass
+                
+                # Get response with V2 advanced agent
+                response = None
+                try:
+                    # Initialize guest session for this conversation
+                    if 'current_guest_session' not in st.session_state or st.session_state.current_guest_session != guest_data['name']:
+                        agent.initiate_guest_session(guest_profile)
+                        st.session_state.current_guest_session = guest_data['name']
+                    
+                    # Get luxury response with metrics
+                    # The agent now uses streaming internally for faster first-token delivery
+                    logger.info(f"🔄 Generating response for: {prompt[:50]}...")
+                    response, metrics = agent.create_luxury_response(prompt, guest_profile)
+                    
+                    # Log quality metrics (for monitoring)
+                    logger.info(f"✅ Response confidence: {metrics.get('confidence_score', 0):.2f}, "
+                              f"Response time: {metrics.get('response_time_ms', 0)}ms, "
+                              f"Streaming: {metrics.get('streaming_enabled', False)}")
+                
+                except TimeoutError as e:
+                    logger.error(f"⏱️ TIMEOUT: {e}")
+                    response = "I sincerely apologize for the delay. My systems are experiencing higher demand at this moment. Please allow me a moment and try again. Your satisfaction is my priority."
+                
+                except Exception as e:
+                    logger.error(f"❌ Error with V2 agent: {e}")
+                    # Fallback for reliability
+                    response = "I apologize for the momentary difficulty. Allow me to suggest our exceptional Obsidian Steakhouse for an unforgettable evening, or our premier entertainment venues. What interests you?"
+                
+                # Update placeholder with actual response
+                response_placeholder.empty()
+                st.markdown(response)
+                
+                # Record this API call for rate limiting
+                record_api_call(guest_name)
+                
+                response_timestamp = format_timestamp()
+                st.caption(response_timestamp)
+                
+                # Add to history
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": response,
+                    "timestamp": response_timestamp
+                })
+                
+                # Show remaining calls
+                remaining_after = remaining - 1
+                if remaining_after <= 2:
+                    st.warning(f"⚠️ {remaining_after} API calls remaining this hour")
     
     # ============================================================================
     # DEBUG INFO (For demo purposes only - remove in production customer app)
     # ============================================================================
     st.markdown("---")
     with st.expander("🔧 Demo Info (For Development Only)"):
-        current_model = st.session_state.get('current_model', 'gpt-5-nano')
+        current_model = st.session_state.get('current_model', 'gpt-5-mini')
         st.caption(f"**AI Model:** {current_model}")
         st.caption(f"**Environment:** Demo mode with rate limiting (5 calls/hour)")
         st.caption("_In production, this debug panel would be hidden from guest-facing UI_")

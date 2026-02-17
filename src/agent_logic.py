@@ -2,7 +2,7 @@
 Wynn Concierge Agent Logic
 GPT-4 powered agent with luxury concierge persona
 
-Version: 1.0.1 - Temperature parameter fix for gpt-5-nano
+Version: 1.0.2 - Testing gpt-5-mini model
 """
 
 import logging
@@ -139,21 +139,21 @@ CRITICAL RULES:
 
 Return ONLY JSON for itineraries, or direct text for simple questions. No markdown."""
     
-    def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-nano"):
+    def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-mini"):
         """
         Initialize the concierge agent.
         
         Args:
             knowledge_base: ResortKnowledgeBase instance
             openai_api_key: OpenAI API key
-            model: OpenAI model to use (default: gpt-5-nano)
+            model: OpenAI model to use (default: gpt-5-mini)
         """
         self.kb = knowledge_base
         self.llm = ChatOpenAI(
             openai_api_key=openai_api_key,
             model=model,
-            temperature=1,  # gpt-5-nano REQUIRES temperature=1 (only supported value)
-            max_completion_tokens=10000,  # Very high limit for reasoning models (gpt-5-nano uses extensive reasoning tokens)
+            temperature=1,  # gpt-5-mini requires temperature=1 (only supported value)
+            max_completion_tokens=8000,  # Reasonable limit for gpt-5-mini
             streaming=False,  # Disabled - using invoke() not stream()
             model_kwargs={"response_format": {"type": "json_object"}}  # Force JSON output
         )
