@@ -22,8 +22,20 @@ from agent_logic import WynnConciergeAgent
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv()
+# Load environment variables with explicit path
+env_path = Path(__file__).parent.parent / ".env"
+logger.info(f"📁 Loading .env from: {env_path}")
+logger.info(f"📁 .env exists: {env_path.exists()}")
+
+# Load with override=True to override shell variables
+load_dotenv(dotenv_path=env_path, override=True)
+
+# Debug: log what API key we got
+api_key_preview = os.getenv('OPENAI_API_KEY', 'NOT_SET')
+logger.info(f"🔑 Raw API key value: '{api_key_preview}'")
+if api_key_preview != 'NOT_SET':
+    logger.info(f"🔑 API key length: {len(api_key_preview)}")
+    logger.info(f"🔑 API key preview: {api_key_preview[:25]}...{api_key_preview[-15:]}")
 
 
 # ============================================================================
@@ -276,31 +288,31 @@ GUESTS_FILE = DATA_DIR / "guests.csv"
 
 
 @st.cache_resource(show_spinner=False)
-def initialize_system():
+def initialize_system(_api_key: str):
     """
-    Initialize the knowledge base and agent (cached globally).
+    Initialize the knowledge base and agent (cached per API key).
     
-    st.cache_resource doesn't pickle return values - it returns the same
-    instance, making it perfect for non-serializable objects like FAISS with
-    OpenAI embeddings. The cache is shared across all users/sessions.
+    The _api_key parameter (with underscore prefix) makes Streamlit cache based on
+    the key value, but excludes it from hash comparison (prevents exposing key in cache).
+    This ensures the cache is invalidated when the API key changes.
     
-    Version: 1.0.1 - Temperature fix for gpt-5-nano compatibility
+    Version: 1.0.3 - Cache invalidation on API key change
     """
-    api_key = os.getenv('OPENAI_API_KEY')
-    
-    if not api_key:
-        st.error("⚠️ OPENAI_API_KEY not found in environment. Please configure your .env file.")
+    # Validate API key
+    if not _api_key or 'your-actual-api-key-here' in _api_key or len(_api_key) < 20:
+        st.error("⚠️ OPENAI_API_KEY not found or invalid. Please configure your .env file.")
         st.stop()
+    
+    # Log API key (first/last chars only for security)
+    logger.info(f"🔑 API key loaded: {_api_key[:15]}...{_api_key[-15:]}")
     
     try:
         # Initialize knowledge base
-        kb = ResortKnowledgeBase(api_key)
+        kb = ResortKnowledgeBase(_api_key)
         
         # Initialize agent with model from environment or default to gpt-5-nano
-        # To change model: Set OPENAI_MODEL in your .env file
-        # Options: gpt-5-nano (cheapest), gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-4
         model = os.getenv('OPENAI_MODEL', 'gpt-5-nano')
-        agent = WynnConciergeAgent(kb, api_key, model=model)
+        agent = WynnConciergeAgent(kb, _api_key, model=model)
         
         # Store model info in session state for display
         if 'current_model' not in st.session_state:
@@ -396,12 +408,10 @@ def render_guest_card(guest_data):
 
 
 def simulate_thinking_process():
-    """Simulate the concierge thinking process with status updates"""
+    """Simulate the concierge thinking process with status updates (OPTIMIZED for low latency)"""
+    # LATENCY FIX: Reduced delays from 3.4s total to 0.3s total
     status_messages = [
-        ("🔍 Searching venue database...", 0.8),
-        ("🛡️ Verifying dietary constraints...", 1.0),
-        ("⏰ Checking availability...", 0.7),
-        ("✨ Finalizing your itinerary...", 0.9)
+        ("⏰ Checking availability...", 0.3),
     ]
     
     placeholder = st.empty()
@@ -485,11 +495,21 @@ def main():
     """Main application"""
     
     # Header
-    st.title("🏝️ Wynn Al Marjan Island")
-    st.subheader("Chief Concierge AI Assistant")
+    col1, col2 = st.columns([5, 1])
     
-    # Initialize system
-    kb, agent = initialize_system()
+    with col1:
+        st.title("🏝️ Wynn Al Marjan Island")
+        st.subheader("Chief Concierge AI Assistant")
+    
+    with col2:
+        st.markdown("<div style='padding-top: 20px;'></div>", unsafe_allow_html=True)
+        if st.button("✨ New Chat", key="new_chat_top", use_container_width=True):
+            st.session_state.messages = []
+            st.rerun()
+    
+    # Load API key and initialize system (cache invalidates on key change)
+    api_key = os.getenv('OPENAI_API_KEY')
+    kb, agent = initialize_system(api_key)
     
     # Load guests
     guests_df = load_guests()
@@ -649,28 +669,43 @@ Thank you for your understanding!"""
         
         # Generate response
         with st.chat_message("assistant"):
-            # Show thinking process
-            simulate_thinking_process()
+            # Quick status (minimal delay for better UX)
+            with st.status("Crafting your experience...", expanded=False) as status:
+                time.sleep(0.2)  # Minimal delay to show we're working
+                status.update(label="Ready!", state="complete", expanded=False)
             
             # Create guest profile dict
             guest_profile = guest_data.to_dict()
             
-            # Get itinerary from agent (THIS IS THE API CALL)
-            with st.spinner("Crafting your itinerary..."):
-                itinerary = agent.create_itinerary(prompt, guest_profile)
+            # Stream the response for lower perceived latency
+            response_placeholder = st.empty()
+            full_response = ""
+            
+            # Use streaming to show response as it arrives
+            try:
+                for chunk in agent.create_itinerary_stream(prompt, guest_profile):
+                    full_response += chunk
+                    response_placeholder.markdown(full_response + "▌")  # Cursor effect
+                
+                # Remove cursor and show final response
+                response_placeholder.markdown(full_response)
+                
+            except Exception as e:
+                logger.error(f"❌ Streaming error: {e}")
+                # Fallback to non-streaming
+                full_response = agent.create_itinerary(prompt, guest_profile)
+                response_placeholder.markdown(full_response)
             
             # Record this API call for rate limiting
             record_api_call(guest_name)
             
-            # Display itinerary
-            st.markdown(itinerary)
             response_timestamp = format_timestamp()
             st.caption(response_timestamp)
             
             # Add to history
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": itinerary,
+                "content": full_response,
                 "timestamp": response_timestamp
             })
             
@@ -678,13 +713,6 @@ Thank you for your understanding!"""
             remaining_after = remaining - 1
             if remaining_after <= 2:
                 st.warning(f"⚠️ {remaining_after} API calls remaining this hour")
-    
-    # Clear chat button
-    col1, col2 = st.columns([6, 1])
-    with col2:
-        if st.button("🔄 New Chat"):
-            st.session_state.messages = []
-            st.rerun()
     
     # ============================================================================
     # DEBUG INFO (For demo purposes only - remove in production customer app)

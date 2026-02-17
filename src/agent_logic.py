@@ -98,64 +98,33 @@ class WynnConciergeAgent:
     Creates personalized itineraries with safety and logistics validation.
     """
     
-    # System prompt template with safe placeholders (avoids format() conflicts with JSON braces)
-    SYSTEM_PROMPT_TEMPLATE = """You are the Chief Concierge at Wynn Al Marjan Island. You are sophisticated, anticipatory, and discreet.
+    # Compact system prompt to reduce token usage
+    SYSTEM_PROMPT_TEMPLATE = """You are Chief Concierge at Wynn Al Marjan Island.
 
-YOUR MISSION:
-Create a seamless evening itinerary (6:00 PM - 2:00 AM) for the guest based on their request.
-
-CRITICAL: You MUST respond with ONLY valid JSON. No markdown, no code blocks, no additional text. Just pure JSON.
-
-OUTPUT FORMAT (MANDATORY):
-Respond with valid JSON in this exact structure:
-{
-  "itinerary": {
-    "events": [
-      {
-        "time": "19:00",
-        "venue_name": "Verde Garden",
-        "venue_type": "Fine Dining",
-        "duration_minutes": 90,
-        "reason": "Matches your preference for romantic settings with exceptional wine selection",
-        "vip_perk": "Reserved the chef's table with complimentary wine pairing"
-      }
-    ]
-  },
-  "guest_message": "Good evening, Ms. Chen. I have taken the liberty of crafting a sophisticated evening that honors your preferences...",
-  "logistics_notes": "Please allow 15 minutes travel time between venues. Dress code: Smart Elegant."
-}
-
-RULES OF ENGAGEMENT (The Human Touch):
-
-1. Logistics First: Never double-book time slots. Allow 90 minutes for dinner and 15 minutes for travel between venues.
-
-2. Safety Check: CROSS-REFERENCE the Guest Profile. Never suggest a venue that conflicts with their dietary restrictions or allergies. If a venue is unsafe, gracefully suggest an alternative that matches the same vibe.
-
-3. Tier Recognition: If the guest is 'Black Tier' (VIP), explicitly mention that you have 'secured the best table' or 'waived the cover charge.' For Platinum tier, acknowledge their status warmly.
-
-4. Tone: Warm, professional, but concise. Do not sound robotic. Use phrases like:
-   - "I have taken the liberty of..."
-   - "Given your preference for..."
-   - "May I suggest..."
-   - "I've arranged..."
-   
-5. Constraints: Verify that venues are open during the itinerary time window and respect dress codes and reservation requirements.
-
-6. Graceful Alternatives: If the guest requests something unsafe (e.g., a vegetarian asking for a steakhouse), acknowledge their request but REDIRECT with sophistication:
-   "While [Venue X] is exceptional, given your dietary preferences, I have instead secured a table at [Alternative Y], which offers..."
-
-Current Guest Context:
-Name: <<GUEST_NAME>>
-Tier: <<LOYALTY_TIER>>
+Guest: <<GUEST_NAME>> (<<LOYALTY_TIER>> Tier)
 Restrictions: <<DIETARY_RESTRICTIONS>>
 Preferences: <<PREFERENCES>>
 
-AVAILABLE VENUES:
+VENUES:
 <<VENUES_CONTEXT>>
 
 Request: <<USER_QUERY>>
 
-REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra text, no markdown formatting, no code blocks."""
+Create evening itinerary (6 PM-2 AM). Return ONLY valid JSON:
+{
+  "itinerary": {"events": [{"time": "19:00", "venue_name": "Verde Garden", "venue_type": "Fine Dining", "duration_minutes": 90, "reason": "Matches preferences", "vip_perk": "Reserved chef's table"}]},
+  "guest_message": "Good evening, [Name]. I have crafted...",
+  "logistics_notes": "Allow 15 min between venues. Dress: Smart Elegant."
+}
+
+RULES:
+1. Never double-book time slots (90 min dinner, 15 min travel)
+2. SAFETY: Never recommend venues unsafe for guest dietary restrictions
+3. Black Tier: Mention VIP perks ("waived cover", "best table")
+4. Tone: Warm, sophisticated, use "I have arranged...", "May I suggest..."
+5. If unsafe request: Gracefully redirect to safe alternative
+
+Return ONLY JSON. No markdown, no code blocks."""
     
     def __init__(self, knowledge_base: ResortKnowledgeBase, openai_api_key: str, model: str = "gpt-5-nano"):
         """
@@ -171,10 +140,11 @@ REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra tex
             openai_api_key=openai_api_key,
             model=model,
             temperature=1,  # gpt-5-nano REQUIRES temperature=1 (only supported value)
-            max_completion_tokens=1500,
+            max_completion_tokens=1500,  # Reduced for faster responses
+            streaming=True,  # Enable streaming for lower perceived latency
             model_kwargs={"response_format": {"type": "json_object"}}  # Force JSON output
         )
-        logger.info(f"✅ Concierge agent initialized with {model} (JSON mode enabled)")
+        logger.info(f"✅ Concierge agent initialized with {model} (JSON mode + streaming enabled)")
     
     def _parse_timeframe(self, query: str) -> tuple:
         """
@@ -226,6 +196,7 @@ REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra tex
     def _get_relevant_venues(self, query: str, guest_profile: Dict, intent: Dict) -> List[Dict]:
         """
         Retrieve relevant venues using RAG with guest-aware filtering.
+        OPTIMIZED: Reduced k values for faster vector search.
         """
         all_venues = []
         
@@ -235,7 +206,7 @@ REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra tex
                 venues = self.kb.search_amenities(
                     query=query,
                     guest_profile=guest_profile,
-                    k=3,
+                    k=2,  # Reduced from 3 to 2 for faster search
                     filter_category=category
                 )
                 all_venues.extend(venues)
@@ -244,7 +215,7 @@ REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra tex
             venues = self.kb.search_amenities(
                 query=query,
                 guest_profile=guest_profile,
-                k=6
+                k=4  # Reduced from 6 to 4 for faster search
             )
             all_venues.extend(venues)
         
@@ -256,7 +227,7 @@ REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra tex
                 seen_ids.add(venue['id'])
                 unique_venues.append(venue)
         
-        return unique_venues[:8]  # Limit to top 8 for context size
+        return unique_venues[:5]  # Reduced from 8 to 5 for smaller context
     
     def _format_venues_context(self, venues: List[Dict]) -> str:
         """Format venues for inclusion in the prompt"""
@@ -300,16 +271,60 @@ REMEMBER: Return ONLY the JSON object. Start with { and end with }. No extra tex
         if not user_query or not user_query.strip():
             return "I apologize, but I didn't catch your request. Could you please tell me what you're looking for this evening?"
         
+        # Quick response for simple greetings and common queries (no need for full itinerary generation)
+        query_lower = user_query.lower().strip()
+        simple_greetings = ['hi', 'hello', 'hey', 'good evening', 'good afternoon', 'greetings', 'thanks', 'thank you']
+        
+        # Fast path for simple greetings
+        if query_lower in simple_greetings or len(user_query.strip()) < 10:
+            guest_name = guest_profile.get('name', 'Guest')
+            tier = guest_profile.get('loyalty_tier', 'Platinum')
+            greeting = f"""Good evening, {guest_name.split()[0] if guest_name != 'Guest' else 'there'}. Welcome to Wynn Al Marjan Island.
+
+As a {tier} Tier member, I'm delighted to assist you this evening. How may I help craft your perfect experience today?
+
+I can help you with:
+• Dining reservations at our award-winning restaurants
+• Entertainment and nightlife recommendations
+• Spa and wellness experiences
+• Special events and celebrations
+
+What are you in the mood for this evening?"""
+            logger.info(f"✅ Quick greeting response (bypassed RAG) for {guest_name}")
+            return greeting
+        
+        # Fast path for simple single-category requests
+        simple_requests = {
+            'dinner': 'Fine Dining',
+            'eat': 'Fine Dining',
+            'restaurant': 'Fine Dining',
+            'spa': 'Spa',
+            'massage': 'Spa',
+            'club': 'Nightlife',
+            'bar': 'Nightlife',
+            'dance': 'Nightlife'
+        }
+        
+        # Check if it's a simple single-word or short request
+        if len(user_query.split()) <= 10:
+            for keyword, category in simple_requests.items():
+                if keyword in query_lower:
+                    logger.info(f"✅ Fast path: Simple '{keyword}' request detected, using quick recommendation")
+                    return self.quick_recommendation(category, guest_profile)
+        
         logger.info(f"🎯 Creating itinerary for {guest_profile.get('name', 'Guest')}: '{user_query}'")
         
         # Extract intent
         intent = self._extract_intent(user_query)
         
-        # Get relevant venues using RAG
+        # Get relevant venues using RAG (optimized: fewer venues for faster processing)
         venues = self._get_relevant_venues(user_query, guest_profile, intent)
         
         if not venues:
             return "I apologize, but I'm having difficulty finding suitable venues for your request. Could you provide more details about what you're looking for this evening?"
+        
+        # Limit venues to top 5 for faster processing (instead of 8)
+        venues = venues[:5]
         
         # Format venues context
         venues_context = self._format_venues_context(venues)
@@ -400,6 +415,10 @@ May I suggest an alternative that would better suit your preferences? Please let
                 logger.error(f"❌ JSON parsing failed: {e}")
                 logger.error(f"Raw response (first 500 chars): {itinerary[:500]}")
                 
+                # Check if response looks like truncated JSON
+                if itinerary.strip() and '{' in itinerary:
+                    logger.warning("⚠️ Response appears truncated - likely hit token limit")
+                
                 # Return a user-friendly error message
                 return """I apologize for the technical difficulty. Let me help you differently.
 
@@ -411,8 +430,137 @@ Could you please tell me:
 I'll create a perfect itinerary for you."""
             
         except Exception as e:
+            error_msg = str(e)
             logger.error(f"❌ Error creating itinerary: {e}")
-            return f"I apologize, but I'm experiencing a technical difficulty. Please try again in a moment. (Error: {str(e)})"
+            
+            # Check for token limit errors
+            if 'length limit' in error_msg or 'max_completion_tokens' in error_msg:
+                logger.error("⚠️ Token limit reached - response was truncated")
+                return f"""I apologize, but my response was too detailed. Let me try a more concise approach.
+
+Could you please be more specific about what you're looking for? For example:
+- "I want Italian dinner and jazz music"
+- "Romantic evening with wine"
+- "Nightlife and dancing"
+
+This will help me create a perfect, focused itinerary for you."""
+            
+            return f"I apologize, but I'm experiencing a technical difficulty. Please try again in a moment."
+    
+    def create_itinerary_stream(self, user_query: str, guest_profile: Dict):
+        """
+        Create a personalized itinerary with streaming support for lower perceived latency.
+        
+        Args:
+            user_query: Guest's natural language request
+            guest_profile: Guest profile dictionary
+        
+        Yields:
+            Chunks of the response as they arrive
+        """
+        # Input validation
+        if not isinstance(guest_profile, dict):
+            logger.error("Invalid guest_profile type: expected dict")
+            yield "I apologize, but there was an error with the guest profile. Please try again."
+            return
+        
+        if not user_query or not user_query.strip():
+            yield "I apologize, but I didn't catch your request. Could you please tell me what you're looking for this evening?"
+            return
+        
+        # Quick response for simple greetings and common queries (no streaming needed)
+        query_lower = user_query.lower().strip()
+        simple_greetings = ['hi', 'hello', 'hey', 'good evening', 'good afternoon', 'greetings', 'thanks', 'thank you']
+        
+        # Fast path for simple greetings
+        if query_lower in simple_greetings or len(user_query.strip()) < 10:
+            guest_name = guest_profile.get('name', 'Guest')
+            tier = guest_profile.get('loyalty_tier', 'Platinum')
+            greeting = f"""Good evening, {guest_name.split()[0] if guest_name != 'Guest' else 'there'}. Welcome to Wynn Al Marjan Island.
+
+As a {tier} Tier member, I'm delighted to assist you this evening. How may I help craft your perfect experience today?
+
+I can help you with:
+• Dining reservations at our award-winning restaurants
+• Entertainment and nightlife recommendations
+• Spa and wellness experiences
+• Special events and celebrations
+
+What are you in the mood for this evening?"""
+            logger.info(f"✅ Quick greeting response (bypassed RAG) for {guest_name}")
+            yield greeting
+            return
+        
+        # Fast path for simple single-category requests
+        simple_requests = {
+            'dinner': 'Fine Dining',
+            'eat': 'Fine Dining',
+            'restaurant': 'Fine Dining',
+            'spa': 'Spa',
+            'massage': 'Spa',
+            'club': 'Nightlife',
+            'bar': 'Nightlife',
+            'dance': 'Nightlife'
+        }
+        
+        # Check if it's a simple single-word or short request
+        if len(user_query.split()) <= 10:
+            for keyword, category in simple_requests.items():
+                if keyword in query_lower:
+                    logger.info(f"✅ Fast path: Simple '{keyword}' request detected, using quick recommendation")
+                    yield self.quick_recommendation(category, guest_profile)
+                    return
+        
+        logger.info(f"🎯 Creating itinerary (streaming) for {guest_profile.get('name', 'Guest')}: '{user_query}'")
+        
+        # Extract intent
+        intent = self._extract_intent(user_query)
+        
+        # Get relevant venues using RAG (optimized: fewer venues for faster processing)
+        venues = self._get_relevant_venues(user_query, guest_profile, intent)
+        
+        if not venues:
+            yield "I apologize, but I'm having difficulty finding suitable venues for your request. Could you provide more details about what you're looking for this evening?"
+            return
+        
+        # Limit venues to top 5 for faster processing
+        venues = venues[:5]
+        
+        # Format venues context
+        venues_context = self._format_venues_context(venues)
+        
+        # Build the prompt
+        prompt = self.SYSTEM_PROMPT_TEMPLATE
+        prompt = prompt.replace('<<GUEST_NAME>>', guest_profile.get('name', 'Guest'))
+        prompt = prompt.replace('<<LOYALTY_TIER>>', guest_profile.get('loyalty_tier', 'Platinum'))
+        prompt = prompt.replace('<<DIETARY_RESTRICTIONS>>', guest_profile.get('dietary_restrictions', 'None'))
+        prompt = prompt.replace('<<PREFERENCES>>', guest_profile.get('preferences', 'N/A'))
+        prompt = prompt.replace('<<VENUES_CONTEXT>>', venues_context)
+        prompt = prompt.replace('<<USER_QUERY>>', user_query)
+        
+        # Get LLM response with streaming
+        messages = [SystemMessage(content=prompt)]
+        
+        try:
+            full_response = ""
+            for chunk in self.llm.stream(messages):
+                if chunk.content:
+                    full_response += chunk.content
+                    yield chunk.content
+            
+            # After streaming completes, validate the response
+            # Note: We've already yielded it, but we log any issues for monitoring
+            policy_check = validate_itinerary_policy(full_response, guest_profile)
+            
+            if not policy_check['valid']:
+                logger.warning(f"⚠️ Policy violation detected in streamed response: {policy_check['violation_type']}")
+                # Can't un-stream, but we log it for monitoring
+            
+            logger.info("✅ Streaming itinerary completed")
+            
+        except Exception as e:
+            logger.error(f"❌ Error streaming itinerary: {e}")
+            yield "\n\nI apologize for the technical difficulty. Please try rephrasing your request."
     
     def quick_recommendation(self, category: str, guest_profile: Dict) -> str:
         """

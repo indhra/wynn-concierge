@@ -1,6 +1,7 @@
 """
 Wynn Concierge Vector Store
 RAG-based knowledge retrieval with guest-aware filtering
+OPTIMIZED: Added query caching for faster repeat searches
 """
 
 import json
@@ -8,6 +9,8 @@ import logging
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 import time
+from functools import lru_cache
+import hashlib
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
@@ -37,6 +40,7 @@ class ResortKnowledgeBase:
             openai_api_key: OpenAI API key for embeddings
             force_rebuild: Force rebuild of vector store even if cached version exists
         """
+        logger.info(f"🔑 vector_store received API key: {openai_api_key[:15]}...{openai_api_key[-15:]}")
         self.embeddings = OpenAIEmbeddings(
             openai_api_key=openai_api_key,
             model="text-embedding-3-small",
@@ -45,7 +49,10 @@ class ResortKnowledgeBase:
         )
         self.resort_data = self._load_resort_data()
         self.vector_store = self._build_or_load_vector_store(force_rebuild)
-        logger.info(f"✅ Knowledge base initialized with {len(self.resort_data)} venues")
+        # LATENCY FIX: Add query cache to avoid redundant vector searches
+        self._query_cache = {}  # Simple dict cache for recent queries
+        self._cache_max_size = 50  # Maximum cached queries
+        logger.info(f"✅ Knowledge base initialized with {len(self.resort_data)} venues (query caching enabled)")
     
     def _load_resort_data(self) -> List[Dict]:
         """Load resort data from JSON with validation"""
@@ -232,7 +239,7 @@ class ResortKnowledgeBase:
         filter_category: Optional[str] = None
     ) -> List[Dict]:
         """
-        Search for venues matching query with guest-aware filtering.
+        OPTIMIZED: Added caching for common queries.
         
         Args:
             query: Natural language search query
@@ -251,6 +258,14 @@ class ResortKnowledgeBase:
         if k <= 0:
             logger.warning(f"Invalid k value: {k}, using default k=5")
             k = 5
+        
+        # LATENCY FIX: Check cache first
+        dietary_str = guest_profile.get('dietary_restrictions', '') if guest_profile else ''
+        cache_key = f"{query}|{dietary_str}|{k}|{filter_category}"
+        
+        if cache_key in self._query_cache:
+            logger.info(f"✅ Cache hit for query: {query[:30]}...")
+            return self._query_cache[cache_key]
         
         # Perform semantic search
         results = self.vector_store.similarity_search(query, k=k*2)  # Get more for filtering
@@ -288,7 +303,17 @@ class ResortKnowledgeBase:
         # Prioritize safe options, then by relevance
         venues.sort(key=lambda x: (not x['is_safe'], -x['relevance_score']))
         
-        return venues[:k]
+        final_results = venues[:k]
+        
+        # LATENCY FIX: Cache the results
+        if len(self._query_cache) >= self._cache_max_size:
+            # Remove oldest entry (simple FIFO)
+            self._query_cache.pop(next(iter(self._query_cache)))
+        self._query_cache[cache_key] = final_results
+        
+        logger.info(f"✅ Query cached: {query[:30]}... ({len(final_results)} results)")
+        
+        return final_results
     
     def get_venue_by_id(self, venue_id: str) -> Optional[Dict]:
         """Get venue by ID"""
